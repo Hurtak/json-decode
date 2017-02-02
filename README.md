@@ -18,6 +18,11 @@
         - is this really better than { unionType: [Number, null] }
         - probably not
 
+- inspiration
+    - http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/latest
+    - https://guide.elm-lang.org/interop/json.html
+    - http://package.elm-lang.org/packages/elm-lang/core/latest/Json-Decode
+
 - should we have validation funcitons??
 - should we JSON.decode the response or not?
 - what should it do when decoding fails?
