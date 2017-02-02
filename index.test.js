@@ -1,10 +1,20 @@
 import test from 'ava'
 
-import jsonDecode from '../index.js'
+import jd from '../index.js'
 
-test('foo', t => {
-  t.is(true, true)
+test('basic types', t => {
+  t.is(jd(null, null), null)
+  // t.is(jd(true, Boolean), true)
+  // t.is(jd(false, Boolean), false)
+  // jd(data, Boolean)
+  // jd(data, Number)
+  // jd(data, String)
+  // jd(data, [Boolean])
+  // jd(data, [Number])
+  // jd(data, [String])
+  // jd(data, {})
 
+/*
   // type
   const data = 200
   jd.decode(data, Number)
@@ -74,18 +84,5 @@ test('foo', t => {
     validation: x => x.length > 0
   })
 
-  // types
-  jd.decode(data, null)
-  jd.decode(data, Boolean)
-  jd.decode(data, Number)
-  jd.decode(data, String)
-  jd.decode(data, [Boolean])
-  jd.decode(data, [Number])
-  jd.decode(data, [String])
-  jd.decode(data, {})
-
+*/
 })
-
-// TODO
-// should we have validation funcitons??
-// should we JSON.decode the response or not?
