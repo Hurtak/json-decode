@@ -1,0 +1,14 @@
+{
+  "name": "json-decoder",
+  "version": "0.0.0",
+  "description": "Validate object strucutre with the ability to specify optional values",
+  "main": "index.js",
+  "scripts": {
+    "test": "ava --watch"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "ava": "0.18.0"
+  }
+}
