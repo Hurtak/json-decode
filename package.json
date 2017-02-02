@@ -4,11 +4,12 @@
   "description": "Validate object strucutre with the ability to specify optional values",
   "main": "index.js",
   "scripts": {
-    "test": "ava --watch"
+    "test": "ava",
+    "watch": "ava --watch"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "ava": "0.18.0"
+    "ava": "^0.18.0"
   }
 }

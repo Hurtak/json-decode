@@ -1,6 +1,6 @@
 import test from 'ava'
 
-import jd from '../index.js'
+import jd from './index.js'
 
 test('basic types', t => {
   t.is(jd(null, null), null)
