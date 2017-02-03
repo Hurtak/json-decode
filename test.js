@@ -4,11 +4,20 @@ import jd from './index.js'
 
 test('basic types', t => {
   t.is(jd(null, null), null)
-  // t.is(jd(true, Boolean), true)
-  // t.is(jd(false, Boolean), false)
-  // jd(data, Boolean)
-  // jd(data, Number)
-  // jd(data, String)
+
+  t.is(jd(true, Boolean), true)
+  t.is(jd(false, Boolean), false)
+
+  t.is(jd(0, Number), 0)
+  t.is(jd(1, Number), 1)
+  t.is(jd(-1, Number), -1)
+  t.is(jd(Number.MAX_SAFE_INTEGER, Number), Number.MAX_SAFE_INTEGER)
+  t.is(jd(Number.MIN_SAFE_INTEGER, Number), Number.MIN_SAFE_INTEGER)
+
+  t.is(jd('', String), '')
+  t.is(jd('x', String), 'x')
+  t.is(jd('abc'.repeat(100), String), 'abc'.repeat(100))
+
   // jd(data, [Boolean])
   // jd(data, [Number])
   // jd(data, [String])
