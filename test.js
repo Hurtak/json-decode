@@ -49,6 +49,7 @@ test('basic types', t => {
   jd.decode(data2, {
     normal: Number,
 
+    // TODO: what if user passe
     optional: { type: Number, default: 0 },
 
     array: [String],
@@ -62,6 +63,13 @@ test('basic types', t => {
     objectOptional: {
       type: { hello: String },
       default: {}
+    },
+
+    // or more like this?
+    objectOptional: {
+      type: Object,
+      default: {},
+      children: { hello: String },
     },
 
     objectUnionTypeOptional: {
