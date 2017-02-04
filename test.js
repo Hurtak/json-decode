@@ -27,17 +27,19 @@ test('basic types', t => {
   t.deepEqual(jd([null], [null]), [null])
   t.deepEqual(jd([true], [Boolean]), [true])
 
-  // union types????
-  // t.is(jd([1], { type: [Number] }), [1])
-  // t.is(jd([1], { type: Array, values: Number }), [1])
-  // t.is(jd([1], [{ type: Number }]), [1])
-
-  // jd(data, [Boolean])
-  // jd(data, [Number])
-  // jd(data, [String])
-  // jd(data, {})
+  t.deepEqual(jd({ number: 1 }, { number: Number }), { number: 1 })
+  t.throws(() => jd({}, {}))
+  t.throws(() => jd({}, { number: Number }))
+  t.throws(() => jd({ number: '' }, { number: Number }))
+})
 
 /*
+
+  // union types????
+  t.is(jd([1], { type: [Number] }), [1])
+  t.is(jd([1], { type: Array, values: Number }), [1])
+  t.is(jd([1], [{ type: Number }]), [1])
+
   // type
   const data = 200
   jd.decode(data, Number)
@@ -115,4 +117,3 @@ test('basic types', t => {
   })
 
 */
-})

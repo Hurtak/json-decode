@@ -5,8 +5,6 @@
 ## TODO
 
 - features
-    - basic types
-        - Objects
     - optional types - if present check against type, if not use default
         - determine syntax
     - global flag to make everything optional/or everything mandatory
@@ -41,3 +39,5 @@
     }
     ```
 - do not import the whole lodash?
+- benchmarks?
+    - data checking should be O(N)

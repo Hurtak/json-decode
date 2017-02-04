@@ -32,12 +32,45 @@ function jsonDecode (data, decoder) {
       }
 
       const typeArrayDecoder = decoderToType(decoder[0])
-      for (const arrayItem of data) {
-        const typeArrayItem = dataToType(arrayItem)
-        if (typeArrayItem !== typeArrayDecoder) {
-          throw new TypeError(`Array value is ${arrayItem} does not match the decoder ${typeToString(typeArrayDecoder)}.`)
+      for (const arrayValue of data) {
+        const typeArrayValue = dataToType(arrayValue)
+        if (typeArrayValue !== typeArrayDecoder) {
+          throw new TypeError(`Array value is ${arrayValue} does not match the decoder ${typeToString(typeArrayDecoder)}.`)
         }
       }
+      break
+    case Type.OBJECT:
+      if (Object.keys(decoder).length === 0) {
+        throw new Error(`Decoder is specified as Object there are no keys specified in the decoder`)
+      }
+
+      for (const decoderObjectKey in decoder) {
+        if (!decoder.hasOwnProperty(decoderObjectKey)) break
+
+        if (!(decoderObjectKey in data)) {
+          throw new Error(`Key "${decoderObjectKey}" is missing in the data`)
+        }
+
+        const objectValue = data[decoderObjectKey]
+        const typeObjectDecoder = decoderToType(decoder[decoderObjectKey])
+        const typeObjectValue = dataToType(objectValue)
+        if (typeObjectDecoder !== typeObjectValue) {
+          throw new TypeError(`Object value "${objectValue}" is not the same type of the decoder which is "${typeToString(typeObjectDecoder)}".`)
+        }
+      }
+      // if (decoder.length === 0) {
+      //   throw new Error(`Decoder is specified as Array but type of its values is not specified`)
+      // } else if (decoder.length >= 2) {
+      //   throw new Error(`More than one type of Array values is specified`)
+      // }
+
+      // const typeArrayDecoder = decoderToType(decoder[0])
+      // for (const arrayItem of data) {
+      //   const typeArrayItem = dataToType(arrayItem)
+      //   if (typeArrayItem !== typeArrayDecoder) {
+      //     throw new TypeError(`Array value is ${arrayItem} does not match the decoder ${typeToString(typeArrayDecoder)}.`)
+      //   }
+      // }
       break
   }
 
