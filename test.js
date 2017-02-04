@@ -15,8 +15,19 @@ test('basic types', t => {
   t.is(jd(Number.MIN_SAFE_INTEGER, Number), Number.MIN_SAFE_INTEGER)
 
   t.is(jd('', String), '')
-  t.is(jd('x', String), 'x')
-  t.is(jd('abc'.repeat(100), String), 'abc'.repeat(100))
+  t.is(jd('a', String), 'a')
+  t.is(jd('0123456789'.repeat(10), String), '0123456789'.repeat(10))
+  t.is(jd('0123456789'.repeat(1000), String), '0123456789'.repeat(1000))
+
+  t.throws(() => jd([], []), [])
+  t.deepEqual(jd([], [Number]), [])
+  t.deepEqual(jd([1], [Number]), [1])
+  t.deepEqual(jd([1, 2, 3], [Number]), [1, 2, 3])
+
+  // union types????
+  // t.is(jd([1], { type: [Number] }), [1])
+  // t.is(jd([1], { type: Array, values: Number }), [1])
+  // t.is(jd([1], [{ type: Number }]), [1])
 
   // jd(data, [Boolean])
   // jd(data, [Number])

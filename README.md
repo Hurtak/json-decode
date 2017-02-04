@@ -6,7 +6,10 @@
 
 - features
     - basic types
+        - Objects
     - optional types - if present check against type, if not use default
+        - determine syntax
+    - global flag to make everything optional/or everything mandatory
     - union types - eg Number or null, User or Admin
         - possible names `oneof`, `typeUnion`, `unionType`
     - validation function - x => x.length > 0

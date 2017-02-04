@@ -15,8 +15,30 @@ function jsonDecode (data, decoder) {
   const typeData = dataToType(data)
   const typeDecoder = decoderToType(decoder)
 
-  if (typeData !== typeDecoder) {
-    throw new TypeError(`Expected data type "${typeToString(typeDecoder)}", got data type "${typeToString(typeData)}"`)
+  switch (typeDecoder) {
+    case Type.NULL:
+    case Type.BOOL:
+    case Type.NUMBER:
+    case Type.STRING:
+      if (typeData !== typeDecoder) {
+        throw new TypeError(`Expected data type "${typeToString(typeDecoder)}", got data type "${typeToString(typeData)}"`)
+      }
+      break
+    case Type.ARRAY:
+      if (decoder.length === 0) {
+        throw new Error(`Decoder is specified as Array but type of its values is not specified`)
+      } else if (decoder.length >= 2) {
+        throw new Error(`More than one type of Array values is specified`)
+      }
+
+      const typeArrayDecoder = decoderToType(decoder[0])
+      for (const arrayItem of data) {
+        const typeArrayItem = dataToType(arrayItem)
+        if (typeArrayItem !== typeArrayDecoder) {
+          throw new TypeError(`Array value is ${arrayItem} does not match the decoder ${typeToString(typeArrayDecoder)}.`)
+        }
+      }
+      break
   }
 
   return data
@@ -29,7 +51,10 @@ function decoderToType (input) {
     case Number: return Type.NUMBER
     case String: return Type.STRING
     default:
-      throw new Error('TODO array')
+      if (_.isArray(input)) return Type.ARRAY
+      else if (_.isObject(input)) return Type.OBJECT
+
+      throw new Error('unknown')
   }
 }
 
