@@ -11,28 +11,42 @@ const Type = {
   OBJECT: 5
 }
 
-function jsonDecode (data, decoder) {
-  const typeData = dataToType(data)
-  const typeDecoder = decoderToType(decoder)
+const decoderDefaults = {
+  optional: false
+}
 
-  switch (typeDecoder) {
+function jsonDecode (dataInput, decoderInput) {
+  const dataType = dataToType(dataInput)
+
+  const isDecoderAsObject = _.isObject(decoderInput) && 'type' in decoderInput // VOLATILE: what if user has object with type as a key - { type: stuff }
+  const decoderInputValue = isDecoderAsObject ? decoderInput.type : decoderInput
+  const decoder = Object.assign(
+    {},
+    decoderDefaults,
+    {
+      value: decoderInputValue, // TODO: unused?
+      type: decoderToType(decoderInputValue)
+    }
+  )
+
+  switch (decoder.type) {
     case Type.NULL:
     case Type.BOOLEAN:
     case Type.NUMBER:
     case Type.STRING:
-      if (typeData !== typeDecoder) {
-        throw new TypeError(`Expected data type "${typeToString(typeDecoder)}", got data type "${typeToString(typeData)}"`)
+      if (dataType !== decoder.type) {
+        throw new TypeError(`Expected data type "${typeToString(decoder.type)}", got data type "${typeToString(dataType)}"`)
       }
       break
     case Type.ARRAY:
-      if (decoder.length === 0) {
+      if (decoder.value.length === 0) {
         throw new Error(`Decoder is specified as Array but type of its values is not specified`)
-      } else if (decoder.length >= 2) {
+      } else if (decoder.value.length >= 2) {
         throw new Error(`More than one type of Array values is specified`)
       }
 
-      const typeArrayDecoder = decoderToType(decoder[0])
-      for (const arrayValue of data) {
+      const typeArrayDecoder = decoderToType(decoder.value[0])
+      for (const arrayValue of dataInput) {
         const typeArrayValue = dataToType(arrayValue)
         if (typeArrayValue !== typeArrayDecoder) {
           throw new TypeError(`Array value is ${arrayValue} does not match the decoder ${typeToString(typeArrayDecoder)}.`)
@@ -40,19 +54,19 @@ function jsonDecode (data, decoder) {
       }
       break
     case Type.OBJECT:
-      if (Object.keys(decoder).length === 0) {
+      if (Object.keys(decoder.value).length === 0) {
         throw new Error(`Decoder is specified as Object there are no keys specified in the decoder`)
       }
 
-      for (const decoderObjectKey in decoder) {
-        if (!decoder.hasOwnProperty(decoderObjectKey)) break
+      for (const decoderObjectKey in decoder.value) {
+        if (!decoder.value.hasOwnProperty(decoderObjectKey)) break
 
-        if (!(decoderObjectKey in data)) {
+        if (!(decoderObjectKey in dataInput)) {
           throw new Error(`Key "${decoderObjectKey}" is missing in the data`)
         }
 
-        const objectValue = data[decoderObjectKey]
-        const typeObjectDecoder = decoderToType(decoder[decoderObjectKey])
+        const objectValue = dataInput[decoderObjectKey]
+        const typeObjectDecoder = decoderToType(decoder.value[decoderObjectKey])
         const typeObjectValue = dataToType(objectValue)
         if (typeObjectDecoder !== typeObjectValue) {
           throw new TypeError(`Object value "${objectValue}" is not the same type of the decoder which is "${typeToString(typeObjectDecoder)}".`)
@@ -74,7 +88,7 @@ function jsonDecode (data, decoder) {
       break
   }
 
-  return data
+  return dataInput
 }
 
 function decoderToType (input) {

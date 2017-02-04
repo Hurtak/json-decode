@@ -3,21 +3,21 @@ import test from 'ava'
 import jd from './index.js'
 
 test('basic types', t => {
-  t.is(jd(null, null), null)
+  t.deepEqual(jd(null, null), null)
 
-  t.is(jd(true, Boolean), true)
-  t.is(jd(false, Boolean), false)
+  t.deepEqual(jd(true, Boolean), true)
+  t.deepEqual(jd(false, Boolean), false)
 
-  t.is(jd(0, Number), 0)
-  t.is(jd(1, Number), 1)
-  t.is(jd(-1, Number), -1)
-  t.is(jd(Number.MAX_SAFE_INTEGER, Number), Number.MAX_SAFE_INTEGER)
-  t.is(jd(Number.MIN_SAFE_INTEGER, Number), Number.MIN_SAFE_INTEGER)
+  t.deepEqual(jd(0, Number), 0)
+  t.deepEqual(jd(1, Number), 1)
+  t.deepEqual(jd(-1, Number), -1)
+  t.deepEqual(jd(Number.MAX_SAFE_INTEGER, Number), Number.MAX_SAFE_INTEGER)
+  t.deepEqual(jd(Number.MIN_SAFE_INTEGER, Number), Number.MIN_SAFE_INTEGER)
 
-  t.is(jd('', String), '')
-  t.is(jd('a', String), 'a')
-  t.is(jd('0123456789'.repeat(10), String), '0123456789'.repeat(10))
-  t.is(jd('0123456789'.repeat(1000), String), '0123456789'.repeat(1000))
+  t.deepEqual(jd('', String), '')
+  t.deepEqual(jd('a', String), 'a')
+  t.deepEqual(jd('0123456789'.repeat(10), String), '0123456789'.repeat(10))
+  t.deepEqual(jd('0123456789'.repeat(1000), String), '0123456789'.repeat(1000))
 
   t.throws(() => jd([], []), [])
   t.deepEqual(jd([], [Number]), [])
@@ -33,12 +33,17 @@ test('basic types', t => {
   t.throws(() => jd({ number: '' }, { number: Number }))
 })
 
-/*
+test('decoder with configuration', t => {
+  // TODO: test if type has unsupported value?
+  //       if it has unsupported value then should we threat it as regular type
+  //       instead of object type?? - could we make it unambiguous
+  t.deepEqual(jd('abc', { type: String }), 'abc')
+  t.deepEqual(jd(1, { type: Number }), 1)
+  t.deepEqual(jd([1], { type: [Number] }), [1])
+  t.deepEqual(jd({ a: 1 }, { type: { a: Number } }), { a: 1 })
+})
 
-  // union types????
-  t.is(jd([1], { type: [Number] }), [1])
-  t.is(jd([1], { type: Array, values: Number }), [1])
-  t.is(jd([1], [{ type: Number }]), [1])
+/*
 
   // type
   const data = 200
