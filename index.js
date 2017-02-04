@@ -4,7 +4,7 @@ const _ = require('lodash')
 
 const Type = {
   NULL: 0,
-  BOOL: 1,
+  BOOLEAN: 1,
   NUMBER: 2,
   STRING: 3,
   ARRAY: 4,
@@ -17,7 +17,7 @@ function jsonDecode (data, decoder) {
 
   switch (typeDecoder) {
     case Type.NULL:
-    case Type.BOOL:
+    case Type.BOOLEAN:
     case Type.NUMBER:
     case Type.STRING:
       if (typeData !== typeDecoder) {
@@ -47,7 +47,7 @@ function jsonDecode (data, decoder) {
 function decoderToType (input) {
   switch (input) {
     case null: return Type.NULL
-    case Boolean: return Type.BOOL
+    case Boolean: return Type.BOOLEAN
     case Number: return Type.NUMBER
     case String: return Type.STRING
     default:
@@ -63,7 +63,7 @@ function dataToAst (input) {
 
   switch (inputType) {
     case Type.NULL:
-    case Type.BOOL:
+    case Type.BOOLEAN:
     case Type.NUMBER:
     case Type.STRING:
       return {
@@ -91,7 +91,7 @@ function dataToAst (input) {
 
 function dataToType (input) {
   if (_.isNull(input)) return Type.NULL
-  else if (_.isBoolean(input)) return Type.BOOL
+  else if (_.isBoolean(input)) return Type.BOOLEAN
   else if (_.isNumber(input)) return Type.NUMBER
   else if (_.isString(input)) return Type.STRING
   else if (_.isArray(input)) return Type.ARRAY
@@ -103,7 +103,7 @@ function dataToType (input) {
 function typeToString (type) {
   switch (type) {
     case Type.NULL: return 'null'
-    case Type.BOOL: return 'bool'
+    case Type.BOOLEAN: return 'bool'
     case Type.NUMBER: return 'number'
     case Type.STRING: return 'string'
     case Type.ARRAY: return 'array'
