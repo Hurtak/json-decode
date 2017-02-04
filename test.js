@@ -23,6 +23,9 @@ test('basic types', t => {
   t.deepEqual(jd([], [Number]), [])
   t.deepEqual(jd([1], [Number]), [1])
   t.deepEqual(jd([1, 2, 3], [Number]), [1, 2, 3])
+  t.deepEqual(jd(['abc'], [String]), ['abc'])
+  t.deepEqual(jd([null], [null]), [null])
+  t.deepEqual(jd([true], [Boolean]), [true])
 
   // union types????
   // t.is(jd([1], { type: [Number] }), [1])
@@ -55,7 +58,6 @@ test('basic types', t => {
   // decode array
   const data2 = [1, 2, 3]
   jd.decode(data2, [jd.number])
-
 
   jd.decode(data2, {
     normal: Number,
