@@ -2,9 +2,59 @@ import test from 'ava'
 
 import jd from './index.js'
 
-test('basic types', t => {
-  t.deepEqual(jd(null, null), null)
+const dataBasic = {
+  null: [
+    null
+  ],
 
+  boolean: [
+    true,
+    false
+  ],
+
+  number: [
+    0,
+    1,
+    -1,
+    123456789,
+    Number.MAX_SAFE_INTEGER,
+    Number.MIN_SAFE_INTEGER
+  ],
+
+  string: [
+    '',
+    'string',
+    '0123456789'.repeat(10),
+    '0123456789'.repeat(1000)
+  ]
+}
+
+test('basic types 2 ', t => {
+  const tests = [
+    [null, 'null'],
+    [Boolean, 'boolean'],
+    [Number, 'number'],
+    [String, 'string']
+  ]
+
+  for (const [decoder, decoderName] of tests) {
+    const typeTested = dataBasic[decoderName]
+    const typeOthers = Object.keys(dataBasic)
+      .filter(key => key !== decoderName)
+      .map(key => dataBasic[key])
+      .reduce((aggregated, currentValue) => [...aggregated, ...currentValue]) // flatten
+
+    for (const item of typeTested) {
+      t.deepEqual(jd(item, decoder), item)
+    }
+
+    for (const item of typeOthers) {
+      t.throws(() => jd(item, decoder))
+    }
+  }
+})
+
+test('basic types', t => {
   t.deepEqual(jd(true, Boolean), true)
   t.deepEqual(jd(false, Boolean), false)
 
@@ -43,6 +93,13 @@ test('decoder with configuration', t => {
   t.deepEqual(jd({ a: 1 }, { type: { a: Number } }), { a: 1 })
 })
 
+test('optional', t => {
+
+  // t.deepEqual(jd({a: 1}, { a: Number }), { a: 1 })
+  // t.deepEqual(jd({a: 1}, { a: { type: Number, default: 0 } }), { a: 1 })
+  // t.deepEqual(jd({}, { a: { type: Number, default: 0 } }), { a: 0 })
+})
+
 test('unknown decoder type', t => {
   // TODO: throws but in wrong brach
   t.throws(() => jd(undefined, undefined))
@@ -61,15 +118,8 @@ test('unknown decoder type', t => {
 
 /*
 
-  // type
-  const data = 200
-  jd.decode(data, Number)
-
   // type + validation function
   jd.decode(data, jd.validate(Number, x => x >= 200 && x < 300))
-
-  // type + optional
-  jd.decode(data, jd.optional(Number, 0))
 
   // type + optional validation function
   jd.decode(data, jd.validate(jd.optional(Number, 0), x => x >= 200 && x < 300))
@@ -78,18 +128,8 @@ test('unknown decoder type', t => {
   // union types
   jd.decode(data, [jd.number, jd.null])
 
-  // decode array
-  const data2 = [1, 2, 3]
-  jd.decode(data2, [jd.number])
-
   jd.decode(data2, {
     normal: Number,
-
-    // TODO: what if user passe
-    optional: { type: Number, default: 0 },
-
-    array: [String],
-    arrayOptional: { type: [String], default: [] },
 
     unionType: { unionType: [String, [String]] },
     unionTypeOptional: { unionType: [String, [String]], default: [] },
