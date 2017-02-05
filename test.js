@@ -2,34 +2,100 @@ import test from 'ava'
 
 import jd from './index.js'
 
-const dataBasic = {
+// Basic data types
+
+const dataTypesBasic = {
+  // dataType: [ [dataDecoder, dataValue] ]
+
   null: [
-    null
+    [null, null]
   ],
 
   boolean: [
-    true,
-    false
+    [Boolean, true],
+    [Boolean, false]
   ],
 
   number: [
-    0,
-    1,
-    -1,
-    123456789,
-    Number.MAX_SAFE_INTEGER,
-    Number.MIN_SAFE_INTEGER
+    [Number, 0],
+    [Number, 1],
+    [Number, -1],
+    [Number, 123456789],
+    [Number, Number.MAX_SAFE_INTEGER],
+    [Number, Number.MIN_SAFE_INTEGER]
   ],
 
   string: [
-    '',
-    'string',
-    '0123456789'.repeat(10),
-    '0123456789'.repeat(1000)
+    // TODO: what string values are supported? test some esoteric characters
+    [String, ''],
+    [String, 'string'],
+    // [String, '0123456789'.repeat(10)],
+    // [String, '0123456789'.repeat(1000)]
   ]
 }
 
-test('basic types 2 ', t => {
+// Collections with basic data types
+
+let dataTypeArrayOfBasicTypes = []
+for (const key in dataTypesBasic) {
+  const type = dataTypesBasic[key]
+
+  const arrayDecoder = [type[0][0]]
+  const arrayValues = type.map(([decoder, value]) => value)
+
+  dataTypeArrayOfBasicTypes.push([ arrayDecoder, arrayValues ])
+}
+
+let dataTypeObjectOfBasicTypes = []
+const object = {}
+for (const key in dataTypesBasic) {
+  const type = dataTypesBasic[key]
+
+  type.forEach((value, index) => {
+    object[`${key}_${index}`] = value
+  })
+}
+dataTypeObjectOfBasicTypes.push(object)
+
+// Add objects to arrays as arays of objects
+
+const dataTypeArrayOfObjects = dataTypeObjectOfBasicTypes.map(object => {
+  const decoder = {}
+  const value = {}
+  for (const key in object) {
+    decoder[key] = object[key][0]
+    value[key] = object[key][1]
+  }
+
+  return [[decoder], [value]]
+})
+
+// Add array data to objects
+
+const dataTypeObjectOfArrays = dataTypeArrayOfBasicTypes
+  .map((value, index) => ({ [`array_${index}`]: value }))
+
+// Marge together data types collections
+const testData = Object.assign(
+  {},
+  dataTypesBasic,
+  { array: [...dataTypeArrayOfBasicTypes, ...dataTypeArrayOfObjects] },
+  { object: [...dataTypeObjectOfBasicTypes, ...dataTypeObjectOfArrays] }
+)
+
+test('Null', t => {
+  const type = null
+  const decoder = null
+
+  t.deepEqual(jd(type, decoder), type)
+  t.throws(() => jd(true, decoder))
+  t.throws(() => jd(false, decoder))
+  t.throws(() => jd(0, decoder))
+  t.throws(() => jd(1, decoder))
+})
+
+
+test.skip('basic types 2 ', t => {
   const tests = [
     [null, 'null'],
     [Boolean, 'boolean'],
@@ -38,10 +104,10 @@ test('basic types 2 ', t => {
   ]
 
   for (const [decoder, decoderName] of tests) {
-    const typeTested = dataBasic[decoderName]
-    const typeOthers = Object.keys(dataBasic)
+    const typeTested = testData[decoderName]
+    const typeOthers = Object.keys(testData)
       .filter(key => key !== decoderName)
-      .map(key => dataBasic[key])
+      .map(key => testData[key])
       .reduce((aggregated, currentValue) => [...aggregated, ...currentValue]) // flatten
 
     for (const item of typeTested) {
@@ -95,7 +161,7 @@ test('Nested types', t => {
   t.throws(() => jd({ a: [false] }, { a: [Number] }))
 })
 
-test('decoder with configuration', t => {
+test('Decoder with configuration', t => {
   // TODO: test if type has unsupported value?
   //       if it has unsupported value then should we threat it as regular type
   //       instead of object type?? - could we make it unambiguous
@@ -105,8 +171,7 @@ test('decoder with configuration', t => {
   t.deepEqual(jd({ a: 1 }, { type: { a: Number } }), { a: 1 })
 })
 
-test('optional', t => {
-
+test('Optional', t => {
   // t.deepEqual(jd({a: 1}, { a: Number }), { a: 1 })
   // t.deepEqual(jd({a: 1}, { a: { type: Number, default: 0 } }), { a: 1 })
   // t.deepEqual(jd({}, { a: { type: Number, default: 0 } }), { a: 0 })
@@ -130,16 +195,10 @@ test('unknown decoder type', t => {
 
 /*
 
-  // type + validation function
-  jd.decode(data, jd.validate(Number, x => x >= 200 && x < 300))
-
-  // type + optional validation function
-  jd.decode(data, jd.validate(jd.optional(Number, 0), x => x >= 200 && x < 300))
+  // validation
   jd.decode(data, { type: Number, default: 0, validation: x => x >= 200 && x < 300 })
 
   // union types
-  jd.decode(data, [jd.number, jd.null])
-
   jd.decode(data2, {
     normal: Number,
 
