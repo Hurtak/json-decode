@@ -7,11 +7,12 @@
         - determine syntax
     - basic nested data types
     - should we have validation funcitons??
-    - should we JSON.decode the response or not?
     - what should it do when decoding fails?
         - probably do not throw but return error message
         - if everything is ok, return decoded object?
         - `{ ok: true, data: { ... }, errors: [ ... ] }
+    - in tests - check if correct error types are thrown
+    - should we JSON.decode the response or not?
     - write more tests
     - nested data types - eg instead of { username: String } we could pass the whole decoder
         - const User = { username: String }

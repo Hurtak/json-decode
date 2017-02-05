@@ -45,8 +45,18 @@ test('decoder with configuration', t => {
 
 test('unknown decoder type', t => {
   // TODO: throws but in wrong brach
-  t.throws(() => jd(1, () => true))
-  t.throws(() => jd(1, Function))
+  t.throws(() => jd(undefined, undefined))
+  t.throws(() => jd(0, 0))
+  t.throws(() => jd(true, true))
+
+  const f = () => true
+  t.throws(() => jd(f, f))
+
+  const f2 = Function
+  t.throws(() => jd(f2, f2))
+
+  const nan = NaN
+  t.throws(() => jd(nan, nan))
 })
 
 /*
