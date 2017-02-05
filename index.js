@@ -19,7 +19,8 @@ const decoderDefaults = {
 function jsonDecode (dataInput, decoderInput) {
   const dataType = dataToType(dataInput)
 
-  const isDecoderAsObject = _.isObject(decoderInput) && 'type' in decoderInput // VOLATILE: what if user has object with type as a key - { type: stuff }
+  // VOLATILE: what if user has object with type as a key - { type: stuff }
+  const isDecoderAsObject = _.isObject(decoderInput) && 'type' in decoderInput
   const decoderInputValue = isDecoderAsObject ? decoderInput.type : decoderInput
   const decoder = Object.assign(
     {},
@@ -46,15 +47,30 @@ function jsonDecode (dataInput, decoderInput) {
         throw new Error(`More than one type of Array values is specified`)
       }
 
-      const typeArrayDecoder = decoderToType(decoder.value[0])
-      for (const arrayValue of dataInput) {
-        const typeArrayValue = dataToType(arrayValue)
-        if (typeArrayValue !== typeArrayDecoder) {
-          throw new TypeError(`Array value is ${arrayValue} does not match the decoder ${typeToString(typeArrayDecoder)}.`)
-        }
+      const decoderArrayValue = decoder.value[0]
+      const typeArrayDecoder = decoderToType(decoderArrayValue)
+      switch (typeArrayDecoder) {
+        case Type.NULL:
+        case Type.BOOLEAN:
+        case Type.NUMBER:
+        case Type.STRING:
+          for (const arrayValue of dataInput) {
+            const typeArrayValue = dataToType(arrayValue)
+            if (typeArrayValue !== typeArrayDecoder) {
+              throw new TypeError(`Array value is ${arrayValue} does not match the decoder ${typeToString(typeArrayDecoder)}.`)
+            }
+          }
+          break
+        case Type.ARRAY:
+        case Type.OBJECT:
+          for (const arrayValue of dataInput) {
+            jsonDecode(arrayValue, decoderArrayValue)
+          }
+          break
       }
       break
     case Type.OBJECT:
+
       if (Object.keys(decoder.value).length === 0) {
         throw new Error(`Decoder is specified as Object there are no keys specified in the decoder.`)
       }
@@ -63,29 +79,30 @@ function jsonDecode (dataInput, decoderInput) {
         if (!decoder.value.hasOwnProperty(decoderObjectKey)) break
 
         if (!(decoderObjectKey in dataInput)) {
-          throw new Error(`Key "${decoderObjectKey}" is missing in the data.`)
+          throw new Error(`Key "${decoderObjectKey}" is missing in the data ${dataInput}.`)
         }
 
+        const decoderObjectValue = decoder.value[decoderObjectKey]
         const objectValue = dataInput[decoderObjectKey]
-        const typeObjectDecoder = decoderToType(decoder.value[decoderObjectKey])
+        const typeObjectDecoder = decoderToType(decoderObjectValue)
         const typeObjectValue = dataToType(objectValue)
-        if (typeObjectDecoder !== typeObjectValue) {
-          throw new TypeError(`Object value "${objectValue}" is not the same type of the decoder which is "${typeToString(typeObjectDecoder)}".`)
+
+        switch (typeObjectDecoder) {
+          case Type.NULL:
+          case Type.BOOLEAN:
+          case Type.NUMBER:
+          case Type.STRING:
+            if (typeObjectDecoder !== typeObjectValue) {
+              throw new TypeError(`Object value "${objectValue}" is not the same type of the decoder which is "${typeToString(typeObjectDecoder)}".`)
+            }
+            break
+          case Type.ARRAY:
+          case Type.OBJECT:
+            jsonDecode(objectValue, decoderObjectValue)
+            break
         }
       }
-      // if (decoder.length === 0) {
-      //   throw new Error(`Decoder is specified as Array but type of its values is not specified`)
-      // } else if (decoder.length >= 2) {
-      //   throw new Error(`More than one type of Array values is specified`)
-      // }
 
-      // const typeArrayDecoder = decoderToType(decoder[0])
-      // for (const arrayItem of data) {
-      //   const typeArrayItem = dataToType(arrayItem)
-      //   if (typeArrayItem !== typeArrayDecoder) {
-      //     throw new TypeError(`Array value is ${arrayItem} does not match the decoder ${typeToString(typeArrayDecoder)}.`)
-      //   }
-      // }
       break
     default:
       throw new TypeError(`Unknown decoder type ${decoder.value}.`)

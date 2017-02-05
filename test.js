@@ -83,6 +83,18 @@ test('basic types', t => {
   t.throws(() => jd({ number: '' }, { number: Number }))
 })
 
+test('Nested types', t => {
+  t.deepEqual(jd([], [{ a: Number }]), [])
+  t.deepEqual(jd([{ a: 1 }], [{ a: Number }]), [{ a: 1 }])
+  t.throws(() => jd([{}], [{ a: Number }]))
+  t.throws(() => jd([{ a: false }], [{ a: Number }]))
+
+  t.deepEqual(jd({ a: [] }, { a: [Number] }), { a: [] })
+  t.deepEqual(jd({ a: [1] }, { a: [Number] }), { a: [1] })
+  t.throws(() => jd({}, { a: [Number] }))
+  t.throws(() => jd({ a: [false] }, { a: [Number] }))
+})
+
 test('decoder with configuration', t => {
   // TODO: test if type has unsupported value?
   //       if it has unsupported value then should we threat it as regular type

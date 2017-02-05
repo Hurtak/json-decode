@@ -5,7 +5,6 @@
 - features
     - optional types - if present check against type, if not use default
         - determine syntax
-    - basic nested data types
     - should we have validation funcitons??
     - what should it do when decoding fails?
         - probably do not throw but return error message
