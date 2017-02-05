@@ -8,7 +8,8 @@ const Type = {
   NUMBER: 2,
   STRING: 3,
   ARRAY: 4,
-  OBJECT: 5
+  OBJECT: 5,
+  UNKNOWN: 6
 }
 
 const decoderDefaults = {
@@ -24,7 +25,7 @@ function jsonDecode (dataInput, decoderInput) {
     {},
     decoderDefaults,
     {
-      value: decoderInputValue, // TODO: unused?
+      value: decoderInputValue,
       type: decoderToType(decoderInputValue)
     }
   )
@@ -55,14 +56,14 @@ function jsonDecode (dataInput, decoderInput) {
       break
     case Type.OBJECT:
       if (Object.keys(decoder.value).length === 0) {
-        throw new Error(`Decoder is specified as Object there are no keys specified in the decoder`)
+        throw new Error(`Decoder is specified as Object there are no keys specified in the decoder.`)
       }
 
       for (const decoderObjectKey in decoder.value) {
         if (!decoder.value.hasOwnProperty(decoderObjectKey)) break
 
         if (!(decoderObjectKey in dataInput)) {
-          throw new Error(`Key "${decoderObjectKey}" is missing in the data`)
+          throw new Error(`Key "${decoderObjectKey}" is missing in the data.`)
         }
 
         const objectValue = dataInput[decoderObjectKey]
@@ -86,6 +87,8 @@ function jsonDecode (dataInput, decoderInput) {
       //   }
       // }
       break
+    default:
+      throw new TypeError(`Unknown decoder type ${decoder.value}.`)
   }
 
   return dataInput
@@ -100,39 +103,7 @@ function decoderToType (input) {
     default:
       if (_.isArray(input)) return Type.ARRAY
       else if (_.isObject(input)) return Type.OBJECT
-
-      throw new Error('unknown')
-  }
-}
-
-function dataToAst (input) {
-  const inputType = dataToType(input)
-
-  switch (inputType) {
-    case Type.NULL:
-    case Type.BOOLEAN:
-    case Type.NUMBER:
-    case Type.STRING:
-      return {
-        value: input,
-        type: inputType,
-        children: null
-      }
-    case Type.ARRAY:
-      return {
-        value: input,
-        type: inputType,
-        children: input.map(dataToAst)
-      }
-    case Type.OBJECT:
-      return {
-        value: input,
-        type: inputType,
-        children: Object.keys(input).map(key => ({
-          key: key,
-          value: dataToAst(input[key])
-        }))
-      }
+      else return Type.UNKNOWN
   }
 }
 
@@ -143,8 +114,7 @@ function dataToType (input) {
   else if (_.isString(input)) return Type.STRING
   else if (_.isArray(input)) return Type.ARRAY
   else if (_.isObject(input)) return Type.OBJECT
-
-  throw new Error('TODO')
+  else return Type.UNKNOWN
 }
 
 function typeToString (type) {
@@ -155,7 +125,7 @@ function typeToString (type) {
     case Type.STRING: return 'string'
     case Type.ARRAY: return 'array'
     case Type.OBJECT: return 'object'
-    default: return 'unknown'
+    case Type.UNKNOWN: return 'unknown'
   }
 }
 

@@ -43,6 +43,12 @@ test('decoder with configuration', t => {
   t.deepEqual(jd({ a: 1 }, { type: { a: Number } }), { a: 1 })
 })
 
+test('unknown decoder type', t => {
+  // TODO: throws but in wrong brach
+  t.throws(() => jd(1, () => true))
+  t.throws(() => jd(1, Function))
+})
+
 /*
 
   // type
