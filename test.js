@@ -4,7 +4,7 @@ import jd from './index.js'
 
 // Basic data types
 
-const dataTypesBasic = {
+const dataTypes = {
   // dataType: [ [dataDecoder, dataValue] ]
 
   null: [
@@ -20,102 +20,87 @@ const dataTypesBasic = {
     [Number, 0],
     [Number, 1],
     [Number, -1],
+
+    [Number, 10e5],
+    [Number, 10e10],
+    [Number, 10e15],
+
+    [Number, 10e-5],
+    [Number, 10e-10],
+    [Number, 10e-15],
+
     [Number, 123456789],
+    [Number, -123456789],
+    [Number, 0.123456789],
+    [Number, -0.123456789],
+
     [Number, Number.MAX_SAFE_INTEGER],
     [Number, Number.MIN_SAFE_INTEGER]
   ],
 
   string: [
-    // TODO: what string values are supported? test some esoteric characters
     [String, ''],
-    [String, 'string'],
-    // [String, '0123456789'.repeat(10)],
-    // [String, '0123456789'.repeat(1000)]
+
+    [String, 'hello world'],
+
+    [String, '你好，世界'],
+    [String, 'สวัสดีชาวโลก'],
+    [String, 'नमस्कार संसार'],
+    [String, 'مرحبا بالعالم'],
+    [String, 'Բարեւ աշխարհ'],
+    [String, 'Chào thế giới'],
+
+    [String, '0123456789'.repeat(10)],
+    [String, '0123456789'.repeat(1000)]
+  ],
+
+  array: [
+    [ [null], [null] ],
+    [ [Boolean], [true, false] ],
+    [ [Number], [0, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER] ],
+    [ [String], ['', 'hello there'] ],
+
+    [ [{ null: null }], [{ null: null }] ],
+    [ [{ boolean: Boolean }], [{ boolean: true }] ],
+    [ [{ number: Number }], [{ number: 1 }] ],
+    [ [{ string: String }], [{ string: 'hello there' }] ]
+  ],
+
+  object: [
+    [ { null: null }, { null: null } ],
+    [ { boolean: Boolean }, { boolean: true } ],
+    [ { number: Number }, { number: 1 } ],
+    [ { string: String }, { string: 'hello there' } ],
+
+    [ { string: [null] }, { string: [null] } ],
+    [ { string: [Boolean] }, { string: [true, false] } ],
+    [ { string: [Number] }, { string: [0, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER] } ],
+    [ { string: [String] }, { string: ['hello there'] } ]
   ]
 }
 
 // Collections with basic data types
 
-let dataTypeArrayOfBasicTypes = []
-for (const key in dataTypesBasic) {
-  const type = dataTypesBasic[key]
+test('Types matrix', t => {
+  for (const keyType in dataTypes) {
+    const type = dataTypes[keyType]
 
-  const arrayDecoder = [type[0][0]]
-  const arrayValues = type.map(([decoder, value]) => value)
+    for (const [decoder, value] of type) {
+      // decoder should correctly decode value
+      t.deepEqual(jd(value, decoder), value)
 
-  dataTypeArrayOfBasicTypes.push([ arrayDecoder, arrayValues ])
-}
+      for (const keyTypeAgain in dataTypes) {
+        if (keyTypeAgain === keyType) continue
 
-let dataTypeObjectOfBasicTypes = []
-const object = {}
-for (const key in dataTypesBasic) {
-  const type = dataTypesBasic[key]
+        const typeOther = dataTypes[keyTypeAgain]
+        for (const [decoderOther, valueOther] of typeOther) {
+          // decoder should not decode agains values from other data types
+          t.throws(() => jd(valueOther, decoder))
 
-  type.forEach((value, index) => {
-    object[`${key}_${index}`] = value
-  })
-}
-dataTypeObjectOfBasicTypes.push(object)
-
-// Add objects to arrays as arays of objects
-
-const dataTypeArrayOfObjects = dataTypeObjectOfBasicTypes.map(object => {
-  const decoder = {}
-  const value = {}
-  for (const key in object) {
-    decoder[key] = object[key][0]
-    value[key] = object[key][1]
-  }
-
-  return [[decoder], [value]]
-})
-
-// Add array data to objects
-
-const dataTypeObjectOfArrays = dataTypeArrayOfBasicTypes
-  .map((value, index) => ({ [`array_${index}`]: value }))
-
-// Marge together data types collections
-const testData = Object.assign(
-  {},
-  dataTypesBasic,
-  { array: [...dataTypeArrayOfBasicTypes, ...dataTypeArrayOfObjects] },
-  { object: [...dataTypeObjectOfBasicTypes, ...dataTypeObjectOfArrays] }
-)
-
-test('Null', t => {
-  const type = null
-  const decoder = null
-
-  t.deepEqual(jd(type, decoder), type)
-  t.throws(() => jd(true, decoder))
-  t.throws(() => jd(false, decoder))
-  t.throws(() => jd(0, decoder))
-  t.throws(() => jd(1, decoder))
-})
-
-
-test.skip('basic types 2 ', t => {
-  const tests = [
-    [null, 'null'],
-    [Boolean, 'boolean'],
-    [Number, 'number'],
-    [String, 'string']
-  ]
-
-  for (const [decoder, decoderName] of tests) {
-    const typeTested = testData[decoderName]
-    const typeOthers = Object.keys(testData)
-      .filter(key => key !== decoderName)
-      .map(key => testData[key])
-      .reduce((aggregated, currentValue) => [...aggregated, ...currentValue]) // flatten
-
-    for (const item of typeTested) {
-      t.deepEqual(jd(item, decoder), item)
-    }
-
-    for (const item of typeOthers) {
-      t.throws(() => jd(item, decoder))
+          // value should not decode agains decoders from other types
+          t.throws(() => jd(value, decoderOther))
+        }
+      }
     }
   }
 })
