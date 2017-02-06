@@ -5,10 +5,8 @@ import jd from './index.js'
 // Basic data types
 
 const dataTypes = {
-  // dataType: [ [dataDecoder, dataValue] ]
-
-  null: [
-    [null, null]
+  null: [ // type
+    [null, null] // [typeDecoder, typeValue]
   ],
 
   boolean: [
@@ -55,32 +53,32 @@ const dataTypes = {
   ],
 
   array: [
-    [ [null], [null] ],
-    [ [Boolean], [true, false] ],
-    [ [Number], [0, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER] ],
-    [ [String], ['', 'hello there'] ],
+    [[null], [null]],
+    [[Boolean], [true, false]],
+    [[Number], [0, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER]],
+    [[String], ['', 'hello there']],
 
-    [ [{ null: null }], [{ null: null }] ],
-    [ [{ boolean: Boolean }], [{ boolean: true }] ],
-    [ [{ number: Number }], [{ number: 1 }] ],
-    [ [{ string: String }], [{ string: 'hello there' }] ]
+    [[{ null: null }], [{ null: null }]],
+    [[{ boolean: Boolean }], [{ boolean: true }]],
+    [[{ number: Number }], [{ number: 1 }]],
+    [[{ string: String }], [{ string: 'hello there' }]]
   ],
 
   object: [
-    [ { null: null }, { null: null } ],
-    [ { boolean: Boolean }, { boolean: true } ],
-    [ { number: Number }, { number: 1 } ],
-    [ { string: String }, { string: 'hello there' } ],
+    [{ null: null }, { null: null }],
+    [{ boolean: Boolean }, { boolean: true }],
+    [{ number: Number }, { number: 1 }],
+    [{ string: String }, { string: 'hello there' }],
 
-    [ { string: [null] }, { string: [null] } ],
-    [ { string: [Boolean] }, { string: [true, false] } ],
-    [ { string: [Number] }, { string: [0, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER] } ],
-    [ { string: [String] }, { string: ['hello there'] } ]
+    [{ string: [null] }, { string: [null] }],
+    [{ string: [Boolean] }, { string: [true, false] }],
+    [{ string: [Number] }, { string: [0, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER] }],
+    [{ string: [String] }, { string: ['hello there'] }]
   ]
 }
 
-// Collections with basic data types
-
+// Test if each type decodes correctly against its decoder and that it
+// errors when the value of type is decoded with decoder of other type.
 test('Types matrix', t => {
   for (const keyType in dataTypes) {
     const type = dataTypes[keyType]
@@ -105,45 +103,60 @@ test('Types matrix', t => {
   }
 })
 
-test('basic types', t => {
-  t.deepEqual(jd(true, Boolean), true)
-  t.deepEqual(jd(false, Boolean), false)
+test('Object', t => {
+  let decoder, value
 
-  t.deepEqual(jd(0, Number), 0)
-  t.deepEqual(jd(1, Number), 1)
-  t.deepEqual(jd(-1, Number), -1)
-  t.deepEqual(jd(Number.MAX_SAFE_INTEGER, Number), Number.MAX_SAFE_INTEGER)
-  t.deepEqual(jd(Number.MIN_SAFE_INTEGER, Number), Number.MIN_SAFE_INTEGER)
-
-  t.deepEqual(jd('', String), '')
-  t.deepEqual(jd('a', String), 'a')
-  t.deepEqual(jd('0123456789'.repeat(10), String), '0123456789'.repeat(10))
-  t.deepEqual(jd('0123456789'.repeat(1000), String), '0123456789'.repeat(1000))
-
-  t.throws(() => jd([], []), [])
-  t.deepEqual(jd([], [Number]), [])
-  t.deepEqual(jd([1], [Number]), [1])
-  t.deepEqual(jd([1, 2, 3], [Number]), [1, 2, 3])
-  t.deepEqual(jd(['abc'], [String]), ['abc'])
-  t.deepEqual(jd([null], [null]), [null])
-  t.deepEqual(jd([true], [Boolean]), [true])
-
-  t.deepEqual(jd({ number: 1 }, { number: Number }), { number: 1 })
-  t.throws(() => jd({}, {}))
-  t.throws(() => jd({}, { number: Number }))
-  t.throws(() => jd({ number: '' }, { number: Number }))
+  decoder = {
+    null: null,
+    boolean: Boolean,
+    number: Number,
+    string: String
+  }
+  value = {
+    null: null,
+    boolean: true,
+    number: 1,
+    string: 'hello'
+  }
+  t.deepEqual(jd(value, decoder), value)
 })
 
 test('Nested types', t => {
-  t.deepEqual(jd([], [{ a: Number }]), [])
-  t.deepEqual(jd([{ a: 1 }], [{ a: Number }]), [{ a: 1 }])
-  t.throws(() => jd([{}], [{ a: Number }]))
-  t.throws(() => jd([{ a: false }], [{ a: Number }]))
+  let decoder, value
 
-  t.deepEqual(jd({ a: [] }, { a: [Number] }), { a: [] })
-  t.deepEqual(jd({ a: [1] }, { a: [Number] }), { a: [1] })
-  t.throws(() => jd({}, { a: [Number] }))
-  t.throws(() => jd({ a: [false] }, { a: [Number] }))
+  // Arrays
+  decoder = [[Number]]
+  value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+  t.deepEqual(jd(value, decoder), value)
+
+  decoder = [[[Number]]]
+  value = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]]
+  t.deepEqual(jd(value, decoder), value)
+
+  decoder = [[{ x: Number }]]
+  value = [[{ x: 1 }, { x: 2 }], [{ x: 3 }, { x: 4 }]]
+  t.deepEqual(jd(value, decoder), value)
+
+  decoder = [{ x: [Number] }]
+  value = [{ x: [1, 2, 3] }]
+  t.deepEqual(jd(value, decoder), value)
+
+  // Objects
+  decoder = { object: [[Number]] }
+  value = { object: [[1, 2, 3], [4, 5, 6], [7, 8, 9]] }
+  t.deepEqual(jd(value, decoder), value)
+
+  decoder = { object: [{ x: Number }] }
+  value = { object: [{ x: 0 }, { x: 2 }, { x: 4 }] }
+  t.deepEqual(jd(value, decoder), value)
+
+  decoder = { object: { x: { y: Number } } }
+  value = { object: { x: { y: 1 } } }
+  t.deepEqual(jd(value, decoder), value)
+
+  decoder = { object: { x: [Number] } }
+  value = { object: { x: [1, 2, 3] } }
+  t.deepEqual(jd(value, decoder), value)
 })
 
 test('Decoder with configuration', t => {

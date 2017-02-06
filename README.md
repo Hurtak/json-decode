@@ -6,6 +6,9 @@
     - optional types - if present check against type, if not use default
         - determine syntax
     - should we have validation funcitons??
+    - decode weirdly shaped data
+        - tuples
+            - [[true, 1, 5], [true, 10, 10]]
     - what should it do when decoding fails?
         - probably do not throw but return error message
         - if everything is ok, return decoded object?
