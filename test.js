@@ -143,11 +143,11 @@ test('Nested types', t => {
 
   // Objects
   decoder = { object: [[Number]] }
-  value = { object: [[1, 2, 3], [4, 5, 6], [7, 8, 9]] }
+  value = { object: [[1, 2], [3, 4], [5, 6]] }
   t.deepEqual(jd(value, decoder), value)
 
   decoder = { object: [{ x: Number }] }
-  value = { object: [{ x: 0 }, { x: 2 }, { x: 4 }] }
+  value = { object: [{ x: 0 }, { x: 1 }, { x: 2 }] }
   t.deepEqual(jd(value, decoder), value)
 
   decoder = { object: { x: { y: Number } } }
@@ -156,6 +156,37 @@ test('Nested types', t => {
 
   decoder = { object: { x: [Number] } }
   value = { object: { x: [1, 2, 3] } }
+  t.deepEqual(jd(value, decoder), value)
+})
+
+test('Shared type objects', t => {
+  let decoder, value
+
+  // define type
+  const UserData = {
+    username: String,
+    email: String
+  }
+
+  // extend it
+  const UserDataExtended = Object.assign({},
+    UserData,
+    { salary: Number }
+  )
+
+  decoder = {
+    userInfo: UserDataExtended,
+    employer: UserData,
+    employees: [UserDataExtended]
+  }
+  value = {
+    userInfo: { username: 'Tom', email: 'tom@gmail.com', salary: 100000 },
+    employer: { username: 'Anna', email: 'anna@gmail.com' },
+    employees: [
+      { username: 'Peter', email: 'tom@gmail.com', salary: 50000 },
+      { username: 'Nina', email: 'tom@gmail.com', salary: 50000 }
+    ]
+  }
   t.deepEqual(jd(value, decoder), value)
 })
 
