@@ -31,14 +31,15 @@ function jsonDecode (dataInput, decoderInput) {
     }
   )
 
+  if (dataType !== decoder.type) {
+    throw new TypeError(`Expected data type "${typeToString(decoder.type)}", got data type "${typeToString(dataType)}"`)
+  }
+
   switch (decoder.type) {
     case Type.NULL:
     case Type.BOOLEAN:
     case Type.NUMBER:
     case Type.STRING:
-      if (dataType !== decoder.type) {
-        throw new TypeError(`Expected data type "${typeToString(decoder.type)}", got data type "${typeToString(dataType)}"`)
-      }
       break
     case Type.ARRAY:
       if (decoder.value.length === 0) {
