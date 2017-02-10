@@ -1,4 +1,5 @@
 import test from 'ava'
+import _ from 'lodash'
 
 import jd from './index.js'
 
@@ -79,13 +80,16 @@ const dataTypes = {
 
 // Test if each type decodes correctly against its decoder and that it
 // errors when the value of type is decoded with decoder of other type.
-test('Types matrix', t => {
+test.only('Types matrix', t => {
   for (const keyType in dataTypes) {
     const type = dataTypes[keyType]
 
     for (const [decoder, value] of type) {
       // decoder should correctly decode value
-      t.deepEqual(jd(value, decoder), value)
+      t.deepEqual(jd(value, decoder), {
+        error: null,
+        data: value
+      })
 
       for (const keyTypeAgain in dataTypes) {
         if (keyTypeAgain === keyType) continue
@@ -93,10 +97,17 @@ test('Types matrix', t => {
         const typeOther = dataTypes[keyTypeAgain]
         for (const [decoderOther, valueOther] of typeOther) {
           // decoder should not decode agains values from other data types
-          t.throws(() => jd(valueOther, decoder))
+          let res
+          res = jd(valueOther, decoder)
+          t.deepEqual(typeof res.error, 'string')
+          t.deepEqual(res.data, valueOther)
+          t.deepEqual(_.size(res), 2)
 
           // value should not decode agains decoders from other types
-          t.throws(() => jd(value, decoderOther))
+          res = jd(value, decoderOther)
+          t.deepEqual(typeof res.error, 'string')
+          t.deepEqual(res.data, value)
+          t.deepEqual(_.size(res), 2)
         }
       }
     }

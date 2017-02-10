@@ -16,7 +16,7 @@ const decoderDefaults = {
   optional: false
 }
 
-function jsonDecode (dataInput, decoderInput) {
+function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
   const dataType = dataToType(dataInput)
 
   // VOLATILE: what if user has object with type as a key - { type: stuff }
@@ -32,7 +32,10 @@ function jsonDecode (dataInput, decoderInput) {
   )
 
   if (dataType !== decoder.type) {
-    throw new TypeError(`Expected data type "${typeToString(decoder.type)}", got data type "${typeToString(dataType)}"`)
+    return {
+      error: `Expected data type "${typeToString(decoder.type)}", got data type "${typeToString(dataType)}"`,
+      data: dataInputWhole
+    }
   }
 
   switch (decoder.type) {
@@ -43,9 +46,15 @@ function jsonDecode (dataInput, decoderInput) {
       break
     case Type.ARRAY:
       if (decoder.value.length === 0) {
-        throw new Error(`Decoder is specified as Array but type of its values is not specified`)
+        return {
+          error: `Decoder is specified as Array but type of its values is not specified`,
+          data: dataInputWhole
+        }
       } else if (decoder.value.length >= 2) {
-        throw new Error(`More than one type of Array values is specified`)
+        return {
+          error: `More than one type of Array values is specified`,
+          data: dataInputWhole
+        }
       }
 
       const decoderArrayValue = decoder.value[0]
@@ -58,14 +67,20 @@ function jsonDecode (dataInput, decoderInput) {
           for (const arrayValue of dataInput) {
             const typeArrayValue = dataToType(arrayValue)
             if (typeArrayValue !== typeArrayDecoder) {
-              throw new TypeError(`Array value is ${arrayValue} does not match the decoder ${typeToString(typeArrayDecoder)}.`)
+              return {
+                error: `Array value is ${arrayValue} does not match the decoder ${typeToString(typeArrayDecoder)}.`,
+                data: dataInputWhole
+              }
             }
           }
           break
         case Type.ARRAY:
         case Type.OBJECT:
           for (const arrayValue of dataInput) {
-            jsonDecode(arrayValue, decoderArrayValue)
+            const res = jsonDecode(arrayValue, decoderArrayValue, dataInputWhole)
+            if (res.error) {
+              return res
+            }
           }
           break
       }
@@ -73,14 +88,20 @@ function jsonDecode (dataInput, decoderInput) {
     case Type.OBJECT:
 
       if (Object.keys(decoder.value).length === 0) {
-        throw new Error(`Decoder is specified as Object there are no keys specified in the decoder.`)
+        return {
+          error: `Decoder is specified as Object there are no keys specified in the decoder.`,
+          data: dataInputWhole
+        }
       }
 
       for (const decoderObjectKey in decoder.value) {
         if (!decoder.value.hasOwnProperty(decoderObjectKey)) break
 
         if (!(decoderObjectKey in dataInput)) {
-          throw new Error(`Key "${decoderObjectKey}" is missing in the data ${dataInput}.`)
+          return {
+            error: `Key "${decoderObjectKey}" is missing in the data ${dataInput}.`,
+            data: dataInputWhole
+          }
         }
 
         const decoderObjectValue = decoder.value[decoderObjectKey]
@@ -94,22 +115,34 @@ function jsonDecode (dataInput, decoderInput) {
           case Type.NUMBER:
           case Type.STRING:
             if (typeObjectDecoder !== typeObjectValue) {
-              throw new TypeError(`Object value "${objectValue}" is not the same type of the decoder which is "${typeToString(typeObjectDecoder)}".`)
+              return {
+                error: `Object value "${objectValue}" is not the same type of the decoder which is "${typeToString(typeObjectDecoder)}".`,
+                data: dataInputWhole
+              }
             }
             break
           case Type.ARRAY:
           case Type.OBJECT:
-            jsonDecode(objectValue, decoderObjectValue)
+            const res = jsonDecode(objectValue, decoderObjectValue, dataInputWhole)
+            if (res.error) {
+              return res
+            }
             break
         }
       }
 
       break
     default:
-      throw new TypeError(`Unknown decoder type ${decoder.value}.`)
+      return {
+        error: `Unknown decoder type ${decoder.value}.`,
+        data: dataInputWhole
+      }
   }
 
-  return dataInput
+  return {
+    error: null,
+    data: dataInputWhole
+  }
 }
 
 function decoderToType (input) {

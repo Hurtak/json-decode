@@ -20,6 +20,7 @@
             }
             // data enhanced with defaults
             data: { a: 1, b: [{c: 1}] }
+            data: null
         }
         - add tests agains faulure states
     - optional types
@@ -61,3 +62,6 @@
 - readme stuff
     - done with test driven development
     - data checking should probably be O(N)
+
+- update package.json
+    - inspiration https://github.com/sindresorhus/clipboard-cli/blob/master/package.json
