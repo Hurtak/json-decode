@@ -9,7 +9,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "ava": "^0.18.0"
+    "ava": "^0.18.1"
   },
   "dependencies": {
     "lodash": "^4.17.4"
