@@ -12,6 +12,7 @@
             data: data | null
         }
         - add tests agains faulure states
+    - consider putting decoder validation at the top
     - optional types
         - optional types - if present check against type, if not use default
         - should optional type be used when value is

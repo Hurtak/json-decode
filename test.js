@@ -275,14 +275,45 @@ test('Shared type objects', t => {
 })
 
 test('Error codes', t => {
-  // let decoder, value, result
+  let decoder, value, result
 
-  // 100 types do not match
-  // decoder = null
-  // value = true
-  // result = jd(value, decoder)
-  // decodingShouldError(t, result)
-  // t.deepEqual(result.error.code, 100)
+  // 100 - type of value does match the decoder type
+  decoder = Number
+  value = false
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.code, 100)
+
+  // 200 - missing type in array decoder
+  decoder = []
+  value = []
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.code, 200)
+
+  // 300 - more than one type specified in array decoder
+  decoder = [Number, String]
+  value = []
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.code, 300)
+
+  // 400 - missing key in object decoder
+  decoder = {}
+  value = {}
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.code, 400)
+
+  // 500 - key specified in decoder is missing from decoded object
+  decoder = { key: Number }
+  value = {}
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.code, 500)
+
+  // 600 - unknown decoder type
+  // TODO - unreachable path at the moment
 })
 
 test('Decoder with configuration', t => {
