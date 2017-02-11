@@ -72,32 +72,14 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
       }
 
       const arrayDecoder = decoder.value[0]
-      const arrayDecoderType = decoderToType(arrayDecoder)
-      switch (arrayDecoderType) {
-        case Type.NULL:
-        case Type.BOOLEAN:
-        case Type.NUMBER:
-        case Type.STRING:
-          for (let i = 0; i < dataInput.length; i++) {
-            const arrayValue = dataInput[i]
-            const res = jsonDecode(arrayValue, arrayDecoder, `${path}[${i}]`)
-            if (res.error) {
-              return res
-            }
-          }
-
-          break
-        case Type.ARRAY:
-        case Type.OBJECT:
-          for (let i = 0; i < dataInput.length; i++) {
-            const arrayValue = dataInput[i]
-            const res = jsonDecode(arrayValue, arrayDecoder, `${path}[${i}]`)
-            if (res.error) {
-              return res
-            }
-          }
-          break
+      for (let i = 0; i < dataInput.length; i++) {
+        const arrayValue = dataInput[i]
+        const res = jsonDecode(arrayValue, arrayDecoder, `${path}[${i}]`)
+        if (res.error) {
+          return res
+        }
       }
+
       break
     case Type.OBJECT:
       if (Object.keys(decoder.value).length === 0) {
