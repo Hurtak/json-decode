@@ -33,7 +33,6 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
   )
 
   if (valueInputType !== decoder.type) {
-    console.log(`Error at ${path} - expected type: ${typeToString(decoder.type)}, given type: ${typeToString(valueInputType)}, given value: ${valueInput}.`)
     return {
       error: {
         message: `Error at ${path} - expected type: ${typeToString(decoder.type)}, given type: ${typeToString(valueInputType)}, given value: ${valueInput}.`,
@@ -54,7 +53,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
       if (decoder.value.length === 0) {
         return {
           error: {
-            message: `Decoder is specified as Array but type of its values is not specified`,
+            message: `Error at ${path} - decoder is specified as array, but type of its values is missing. Given "[]", expecting "[type]".`,
             path: path,
             code: 200
           },
@@ -62,9 +61,10 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
         }
       } else if (decoder.value.length >= 2) {
         // TODO: maybe this should not be error but implicit tuple decoding
+        //       if not, put real values into "[type, type, …]"
         return {
           error: {
-            message: `More than one type of Array values is specified`,
+            message: `Error at ${path} - more than one type of array values is specified, please specify only one. Given "[type, type, …]", expecting "[type]".`,
             path: path,
             code: 300
           },
@@ -86,7 +86,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
       if (Object.keys(decoder.value).length === 0) {
         return {
           error: {
-            message: `Decoder is specified as Object there are no keys specified in the decoder.`,
+            message: `Error at ${path} - decoder is specified as object, but there are no properties specified in it. Given "{}", expecting "{key: type, …}".`,
             path: path,
             code: 400
           },
@@ -100,7 +100,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
         if (!(objectDecoderKey in valueInput)) {
           return {
             error: {
-              message: `Key "${objectDecoderKey}" is missing in the data ${valueInput}.`,
+              message: `Error at ${path} - key "${objectDecoderKey}" is missing in the data. Given: "{key: type}, expecting "{differentKey: type}"`,
               path: path,
               code: 500
             },
@@ -117,9 +117,10 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
       }
       break
     default:
+      // TODO: better error message
       return {
         error: {
-          message: `Unknown decoder type ${decoder.value}.`,
+          message: `Error at ${path} - unknown decoder.`,
           path: path,
           code: 600
         },
@@ -166,10 +167,6 @@ function typeToString (type) {
     case Type.OBJECT: return 'object'
     case Type.UNKNOWN: return 'unknown'
   }
-}
-
-function valueToString (value) {
-
 }
 
 module.exports = jsonDecode

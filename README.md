@@ -3,8 +3,8 @@
 ## TODO
 
 - features
-    - incorporate path into the error messages
     - cleanup error messages
+        - grammarly
     - consider putting decoder validation at the top
         - probably not but we could put the 600 unreachable error at the top
     - optional types
