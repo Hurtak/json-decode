@@ -6,6 +6,7 @@
     - incorporate path into the error messages
     - cleanup error messages
     - consider putting decoder validation at the top
+        - probably not but we could put the 600 unreachable error at the top
     - optional types
         - optional types - if present check against type, if not use default
         - should optional type be used when value is
