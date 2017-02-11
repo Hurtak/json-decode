@@ -123,22 +123,40 @@ test('Types matrix', t => {
 })
 
 test('Object', t => {
-  let decoder, value
+  let decoderOriginal, valueOriginal
 
-  decoder = {
+  decoderOriginal = {
     null: null,
     boolean: Boolean,
     number: Number,
     string: String
   }
-  value = {
+  valueOriginal = {
     null: null,
     boolean: true,
     number: 1,
     string: 'hello'
   }
+  decodingShouldBeOk(t, jd(valueOriginal, decoderOriginal), valueOriginal)
 
+  let decoder, value
+
+  // additional property
+  decoder = _.cloneDeep(decoderOriginal)
+  value = _.cloneDeep(valueOriginal)
+  value.additionalProperty = true
   decodingShouldBeOk(t, jd(value, decoder), value)
+
+  decoder = _.cloneDeep(decoderOriginal)
+  value = _.cloneDeep(valueOriginal)
+  decoder.additionalProperty = Boolean
+  decodingShouldError(t, jd(value, decoder))
+
+  // wrong value
+  decoder = _.cloneDeep(decoderOriginal)
+  value = _.cloneDeep(valueOriginal)
+  value.number = '1'
+  decodingShouldError(t, jd(value, decoder))
 })
 
 test('Nested types', t => {
@@ -146,41 +164,75 @@ test('Nested types', t => {
 
   // Arrays
   decoder = [[Number]]
+
   value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
   decodingShouldBeOk(t, jd(value, decoder), value)
+  value = [[]]
+  decodingShouldBeOk(t, jd(value, decoder), value)
+  value = []
+  decodingShouldBeOk(t, jd(value, decoder), value)
+  value = undefined
+  decodingShouldError(t, jd(value, decoder))
+  value = [[1, 2, 3], [4, '5', 6], [7, 8, 9]]
+  decodingShouldError(t, jd(value, decoder))
 
   decoder = [[[Number]]]
+
   value = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]]
   decodingShouldBeOk(t, jd(value, decoder), value)
+  value = [[[1, 2], [3, 4]], [['5', 6], [7, 8]]]
+  decodingShouldError(t, jd(value, decoder), value)
 
   decoder = [[{ x: Number }]]
+
   value = [[{ x: 1 }, { x: 2 }], [{ x: 3 }, { x: 4 }]]
   decodingShouldBeOk(t, jd(value, decoder), value)
+  value = [[{ x: 1 }, { x: 2 }], [{ x: true }, { x: 4 }]]
+  decodingShouldError(t, jd(value, decoder))
+  value = [[{ x: 1 }, { x: 2 }], [{}, { x: 4 }]]
+  decodingShouldError(t, jd(value, decoder))
 
   decoder = [{ x: [Number] }]
+
   value = [{ x: [1, 2, 3] }]
   decodingShouldBeOk(t, jd(value, decoder), value)
+  value = [{ x: [1, '2', 3] }]
+  decodingShouldError(t, jd(value, decoder))
+  value = [{}]
+  decodingShouldError(t, jd(value, decoder))
 
   // Objects
   decoder = { object: [[Number]] }
+
   value = { object: [[1, 2], [3, 4], [5, 6]] }
   decodingShouldBeOk(t, jd(value, decoder), value)
+  value = { object: [[1, 2], [3, {'4': 4}], [5, 6]] }
+  decodingShouldError(t, jd(value, decoder))
 
   decoder = { object: [{ x: Number }] }
+
   value = { object: [{ x: 0 }, { x: 1 }, { x: 2 }] }
   decodingShouldBeOk(t, jd(value, decoder), value)
+  value = { object: [{ x: 0 }, {}, { x: 2 }] }
+  decodingShouldError(t, jd(value, decoder))
 
   decoder = { object: { x: { y: Number } } }
+
   value = { object: { x: { y: 1 } } }
   decodingShouldBeOk(t, jd(value, decoder), value)
+  value = { object: { x: { y: null } } }
+  decodingShouldError(t, jd(value, decoder))
 
   decoder = { object: { x: [Number] } }
+
   value = { object: { x: [1, 2, 3] } }
   decodingShouldBeOk(t, jd(value, decoder), value)
+  value = { object: { x: [1, null, 3] } }
+  decodingShouldError(t, jd(value, decoder))
 })
 
 test('Shared type objects', t => {
-  let decoder, value
+  let decoderOriginal, valueOriginal
 
   // define type
   const UserData = {
@@ -194,12 +246,12 @@ test('Shared type objects', t => {
     { salary: Number }
   )
 
-  decoder = {
+  decoderOriginal = {
     userInfo: UserDataExtended,
     employer: UserData,
     employees: [UserDataExtended]
   }
-  value = {
+  valueOriginal = {
     userInfo: { username: 'Tom', email: 'tom@gmail.com', salary: 100000 },
     employer: { username: 'Anna', email: 'anna@gmail.com' },
     employees: [
@@ -207,17 +259,30 @@ test('Shared type objects', t => {
       { username: 'Nina', email: 'tom@gmail.com', salary: 50000 }
     ]
   }
+  decodingShouldBeOk(t, jd(valueOriginal, decoderOriginal), valueOriginal)
 
-  decodingShouldBeOk(t, jd(value, decoder), value)
+  let decoder, value
+
+  decoder = _.cloneDeep(decoderOriginal)
+  value = _.cloneDeep(valueOriginal)
+  value.employees[1].email = null
+  decodingShouldError(t, jd(value, decoder))
+
+  decoder = _.cloneDeep(decoderOriginal)
+  value = _.cloneDeep(valueOriginal)
+  delete value.employer.username
+  decodingShouldError(t, jd(value, decoder))
 })
 
 test('Error codes', t => {
   // let decoder, value, result
 
+  // 100 types do not match
   // decoder = null
-  // value = null
+  // value = true
   // result = jd(value, decoder)
-
+  // decodingShouldError(t, result)
+  // t.deepEqual(result.error.code, 100)
 })
 
 test('Decoder with configuration', t => {
