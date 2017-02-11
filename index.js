@@ -18,7 +18,7 @@ const decoderDefaults = {
 
 // VOLATILE: path attribute should not be public
 function jsonDecode (dataInput, decoderInput, path = '<data>') {
-  const dataType = dataToType(dataInput)
+  const dataInputType = dataToType(dataInput)
 
   // VOLATILE: what if user has object with type as a key - { type: stuff }
   const isDecoderAsObject = _.isObject(decoderInput) && 'type' in decoderInput
@@ -32,10 +32,10 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
     }
   )
 
-  if (dataType !== decoder.type) {
+  if (dataInputType !== decoder.type) {
     return {
       error: {
-        message: `Expected data type "${typeToString(decoder.type)}", got data type "${typeToString(dataType)}"`,
+        message: `Expected data type "${typeToString(decoder.type)}", got data type "${typeToString(dataInputType)}"`,
         path: path,
         code: 100
       },
@@ -71,16 +71,16 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
         }
       }
 
-      const decoderArrayValue = decoder.value[0]
-      const typeArrayDecoder = decoderToType(decoderArrayValue)
-      switch (typeArrayDecoder) {
+      const arrayDecoder = decoder.value[0]
+      const arrayDecoderType = decoderToType(arrayDecoder)
+      switch (arrayDecoderType) {
         case Type.NULL:
         case Type.BOOLEAN:
         case Type.NUMBER:
         case Type.STRING:
           for (let i = 0; i < dataInput.length; i++) {
             const arrayValue = dataInput[i]
-            const res = jsonDecode(arrayValue, decoderArrayValue, path)
+            const res = jsonDecode(arrayValue, arrayDecoder, path)
             if (res.error) {
               return res
             }
@@ -90,7 +90,7 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
         case Type.ARRAY:
         case Type.OBJECT:
           for (const arrayValue of dataInput) {
-            const res = jsonDecode(arrayValue, decoderArrayValue, path)
+            const res = jsonDecode(arrayValue, arrayDecoder, path)
             if (res.error) {
               return res
             }
@@ -110,14 +110,14 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
         }
       }
 
-      for (const decoderObjectKey in decoder.value) {
-        if (!decoder.value.hasOwnProperty(decoderObjectKey)) break
+      for (const objectDecoderKey in decoder.value) {
+        if (!decoder.value.hasOwnProperty(objectDecoderKey)) break
 
-        if (!(decoderObjectKey in dataInput)) {
-          path += `.${decoderObjectKey}`
+        if (!(objectDecoderKey in dataInput)) {
+          path += `.${objectDecoderKey}`
           return {
             error: {
-              message: `Key "${decoderObjectKey}" is missing in the data ${dataInput}.`,
+              message: `Key "${objectDecoderKey}" is missing in the data ${dataInput}.`,
               path: path,
               code: 500
             },
@@ -125,9 +125,9 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
           }
         }
 
-        const decoderObjectValue = decoder.value[decoderObjectKey]
-        const objectValue = dataInput[decoderObjectKey]
-        const res = jsonDecode(objectValue, decoderObjectValue, path)
+        const objectDecoder = decoder.value[objectDecoderKey]
+        const objectValue = dataInput[objectDecoderKey]
+        const res = jsonDecode(objectValue, objectDecoder, path)
         if (res.error) {
           return res
         }
