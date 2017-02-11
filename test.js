@@ -214,6 +214,10 @@ test('Shared type objects', t => {
   decodingShouldBeOk(t, value, decoder)
 })
 
+test('Error codes', t => {
+  // 0
+})
+
 test('Decoder with configuration', t => {
   // TODO: test if type has unsupported value?
   //       if it has unsupported value then should we threat it as regular type

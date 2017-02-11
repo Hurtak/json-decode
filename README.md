@@ -5,21 +5,11 @@
 - features
     - what should it do when decoding fails?
         {
-            error: null
             error: {
                 message: "Decoding failed at "wholeDecodedValue.b[0].c", value "1", decoder "Boolean"."
-                pathString
-                pathValue
-                pathDecoder
-                path: {
-                    string: "<data>.b[0].c"
-                    value: {b: [{c: 1}]},
-                    decoder: {b: [{c: Boolean}]},
-                    string: "<data>"
-                    value: 'true',
-                    decoder: Boolean,
-                }
-            }
+                code: 1
+            } | null
+            data: data | null
         }
         - add tests agains faulure states
     - optional types

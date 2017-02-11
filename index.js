@@ -16,7 +16,7 @@ const decoderDefaults = {
   optional: false
 }
 
-function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
+function jsonDecode (dataInput, decoderInput, path = '<data>') {
   const dataType = dataToType(dataInput)
 
   // VOLATILE: what if user has object with type as a key - { type: stuff }
@@ -35,6 +35,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
     return {
       error: {
         message: `Expected data type "${typeToString(decoder.type)}", got data type "${typeToString(dataType)}"`,
+        path: path,
         code: 1
       },
       data: null
@@ -52,6 +53,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
         return {
           error: {
             message: `Decoder is specified as Array but type of its values is not specified`,
+            path: path,
             code: 2
           },
           data: null
@@ -60,6 +62,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
         return {
           error: {
             message: `More than one type of Array values is specified`,
+            path: path,
             code: 3
           },
           data: null
@@ -73,12 +76,15 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
         case Type.BOOLEAN:
         case Type.NUMBER:
         case Type.STRING:
-          for (const arrayValue of dataInput) {
+          for (let i = 0; i < dataInput.length; i++) {
+            const arrayValue = dataInput[i]
             const typeArrayValue = dataToType(arrayValue)
             if (typeArrayValue !== typeArrayDecoder) {
+              path += `[${i}]`
               return {
                 error: {
                   message: `Array value is ${arrayValue} does not match the decoder ${typeToString(typeArrayDecoder)}.`,
+                  path: path,
                   code: 4
                 },
                 data: null
@@ -89,7 +95,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
         case Type.ARRAY:
         case Type.OBJECT:
           for (const arrayValue of dataInput) {
-            const res = jsonDecode(arrayValue, decoderArrayValue, dataInputWhole)
+            const res = jsonDecode(arrayValue, decoderArrayValue, path)
             if (res.error) {
               return res
             }
@@ -98,11 +104,11 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
       }
       break
     case Type.OBJECT:
-
       if (Object.keys(decoder.value).length === 0) {
         return {
           error: {
             message: `Decoder is specified as Object there are no keys specified in the decoder.`,
+            path: path,
             code: 5
           },
           data: null
@@ -113,9 +119,11 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
         if (!decoder.value.hasOwnProperty(decoderObjectKey)) break
 
         if (!(decoderObjectKey in dataInput)) {
+          path += `.${decoderObjectKey}`
           return {
             error: {
               message: `Key "${decoderObjectKey}" is missing in the data ${dataInput}.`,
+              path: path,
               code: 6
             },
             data: null
@@ -133,9 +141,11 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
           case Type.NUMBER:
           case Type.STRING:
             if (typeObjectDecoder !== typeObjectValue) {
+              path += `.${decoderObjectKey}`
               return {
                 error: {
                   message: `Object value "${objectValue}" is not the same type of the decoder which is "${typeToString(typeObjectDecoder)}".`,
+                  path: path,
                   code: 7
                 },
                 data: null
@@ -144,7 +154,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
             break
           case Type.ARRAY:
           case Type.OBJECT:
-            const res = jsonDecode(objectValue, decoderObjectValue, dataInputWhole)
+            const res = jsonDecode(objectValue, decoderObjectValue, path)
             if (res.error) {
               return res
             }
@@ -157,6 +167,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
       return {
         error: {
           message: `Unknown decoder type ${decoder.value}.`,
+          path: path,
           code: 8
         },
         data: null
@@ -165,7 +176,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
 
   return {
     error: null,
-    data: dataInputWhole
+    data: dataInput
   }
 }
 
