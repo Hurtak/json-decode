@@ -7,20 +7,19 @@
         {
             error: null
             error: {
-                value: { a: 1, b: [{c: 1}] },
-                decoder: { a: Number, b: [{c: Boolean}]},
-                currentDecodedValue: 1,
-                currentDecoder: Boolean,
+                message: "Decoding failed at "wholeDecodedValue.b[0].c", value "1", decoder "Boolean"."
+                pathString
+                pathValue
+                pathDecoder
                 path: {
+                    string: "<data>.b[0].c"
                     value: {b: [{c: 1}]},
                     decoder: {b: [{c: Boolean}]},
-                    string: "wholeDecodedValue.b[0].c"
+                    string: "<data>"
+                    value: 'true',
+                    decoder: Boolean,
                 }
-                message: "Decoding failed at "wholeDecodedValue.b[0].c", value "1", decoder "Boolean"."
             }
-            // data enhanced with defaults
-            data: { a: 1, b: [{c: 1}] }
-            data: null
         }
         - add tests agains faulure states
     - optional types

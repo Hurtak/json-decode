@@ -99,15 +99,19 @@ test.only('Types matrix', t => {
           // decoder should not decode agains values from other data types
           let res
           res = jd(valueOther, decoder)
-          t.deepEqual(typeof res.error, 'string')
-          t.deepEqual(res.data, null)
           t.deepEqual(_.size(res), 2)
+          t.deepEqual(_.size(res.error), 2)
+          t.deepEqual(res.data, null)
+          t.deepEqual(typeof res.error.message, 'string')
+          t.deepEqual(typeof res.error.code, 'number')
 
           // value should not decode agains decoders from other types
           res = jd(value, decoderOther)
-          t.deepEqual(typeof res.error, 'string')
-          t.deepEqual(res.data, null)
           t.deepEqual(_.size(res), 2)
+          t.deepEqual(_.size(res.error), 2)
+          t.deepEqual(res.data, null)
+          t.deepEqual(typeof res.error.message, 'string')
+          t.deepEqual(typeof res.error.code, 'number')
         }
       }
     }

@@ -33,7 +33,10 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
 
   if (dataType !== decoder.type) {
     return {
-      error: `Expected data type "${typeToString(decoder.type)}", got data type "${typeToString(dataType)}"`,
+      error: {
+        message: `Expected data type "${typeToString(decoder.type)}", got data type "${typeToString(dataType)}"`,
+        code: 1
+      },
       data: null
     }
   }
@@ -47,12 +50,18 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
     case Type.ARRAY:
       if (decoder.value.length === 0) {
         return {
-          error: `Decoder is specified as Array but type of its values is not specified`,
+          error: {
+            message: `Decoder is specified as Array but type of its values is not specified`,
+            code: 2
+          },
           data: null
         }
       } else if (decoder.value.length >= 2) {
         return {
-          error: `More than one type of Array values is specified`,
+          error: {
+            message: `More than one type of Array values is specified`,
+            code: 3
+          },
           data: null
         }
       }
@@ -68,7 +77,10 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
             const typeArrayValue = dataToType(arrayValue)
             if (typeArrayValue !== typeArrayDecoder) {
               return {
-                error: `Array value is ${arrayValue} does not match the decoder ${typeToString(typeArrayDecoder)}.`,
+                error: {
+                  message: `Array value is ${arrayValue} does not match the decoder ${typeToString(typeArrayDecoder)}.`,
+                  code: 4
+                },
                 data: null
               }
             }
@@ -89,7 +101,10 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
 
       if (Object.keys(decoder.value).length === 0) {
         return {
-          error: `Decoder is specified as Object there are no keys specified in the decoder.`,
+          error: {
+            message: `Decoder is specified as Object there are no keys specified in the decoder.`,
+            code: 5
+          },
           data: null
         }
       }
@@ -99,7 +114,10 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
 
         if (!(decoderObjectKey in dataInput)) {
           return {
-            error: `Key "${decoderObjectKey}" is missing in the data ${dataInput}.`,
+            error: {
+              message: `Key "${decoderObjectKey}" is missing in the data ${dataInput}.`,
+              code: 6
+            },
             data: null
           }
         }
@@ -116,7 +134,10 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
           case Type.STRING:
             if (typeObjectDecoder !== typeObjectValue) {
               return {
-                error: `Object value "${objectValue}" is not the same type of the decoder which is "${typeToString(typeObjectDecoder)}".`,
+                error: {
+                  message: `Object value "${objectValue}" is not the same type of the decoder which is "${typeToString(typeObjectDecoder)}".`,
+                  code: 7
+                },
                 data: null
               }
             }
@@ -134,7 +155,10 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
       break
     default:
       return {
-        error: `Unknown decoder type ${decoder.value}.`,
+        error: {
+          message: `Unknown decoder type ${decoder.value}.`,
+          code: 8
+        },
         data: null
       }
   }
