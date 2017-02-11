@@ -3,15 +3,8 @@
 ## TODO
 
 - features
-    - what should it do when decoding fails?
-        {
-            error: {
-                message: "Decoding failed at "wholeDecodedValue.b[0].c", value "1", decoder "Boolean"."
-                code: 1
-            } | null
-            data: data | null
-        }
-        - add tests agains faulure states
+    - incorporate path into the error messages
+    - cleanup error messages
     - consider putting decoder validation at the top
     - optional types
         - optional types - if present check against type, if not use default

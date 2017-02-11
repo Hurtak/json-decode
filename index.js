@@ -80,7 +80,7 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
         case Type.STRING:
           for (let i = 0; i < dataInput.length; i++) {
             const arrayValue = dataInput[i]
-            const res = jsonDecode(arrayValue, arrayDecoder, path)
+            const res = jsonDecode(arrayValue, arrayDecoder, `${path}[${i}]`)
             if (res.error) {
               return res
             }
@@ -89,8 +89,9 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
           break
         case Type.ARRAY:
         case Type.OBJECT:
-          for (const arrayValue of dataInput) {
-            const res = jsonDecode(arrayValue, arrayDecoder, path)
+          for (let i = 0; i < dataInput.length; i++) {
+            const arrayValue = dataInput[i]
+            const res = jsonDecode(arrayValue, arrayDecoder, `${path}[${i}]`)
             if (res.error) {
               return res
             }
@@ -114,7 +115,6 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
         if (!decoder.value.hasOwnProperty(objectDecoderKey)) break
 
         if (!(objectDecoderKey in dataInput)) {
-          path += `.${objectDecoderKey}`
           return {
             error: {
               message: `Key "${objectDecoderKey}" is missing in the data ${dataInput}.`,
@@ -127,7 +127,7 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
 
         const objectDecoder = decoder.value[objectDecoderKey]
         const objectValue = dataInput[objectDecoderKey]
-        const res = jsonDecode(objectValue, objectDecoder, path)
+        const res = jsonDecode(objectValue, objectDecoder, `${path}.${objectDecoderKey}`)
         if (res.error) {
           return res
         }

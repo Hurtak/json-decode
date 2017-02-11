@@ -316,6 +316,50 @@ test('Error codes', t => {
   // TODO - unreachable path at the moment
 })
 
+test('Error path', t => {
+  let decoder, value, result
+
+  // basic type
+  decoder = Number
+  value = false
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.path, '<data>')
+
+  // arrays
+  decoder = [Number]
+  value = [0, 1, '2', 3]
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.path, '<data>[2]')
+
+  decoder = [[Number]]
+  value = [[0], [1], [2, '1'], [3]]
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.path, '<data>[2][1]')
+
+  // objects
+  decoder = {a: Number}
+  value = {a: '1'}
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.path, '<data>.a')
+
+  decoder = {a: Number, b: {bb: Number}, c: Number}
+  value = {a: 1, b: {bb: '1'}, c: 1}
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.path, '<data>.b.bb')
+
+  // combined
+  decoder = {a: Number, b: [{ aa: Number, bb: [Number] }], c: Number}
+  value = {a: 1, b: [{aa: 1, bb: [0, 1]}, {aa: 1, bb: [0, '1', 2]}], c: 1}
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.path, '<data>.b[1].bb[1]')
+})
+
 test('Decoder with configuration', t => {
   // TODO: test if type has unsupported value?
   //       if it has unsupported value then should we threat it as regular type
