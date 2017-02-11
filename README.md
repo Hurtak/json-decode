@@ -28,8 +28,11 @@
         - possible names `oneof`, `typeUnion`, `unionType`
         - [null, 1, null, 10, 10]
         - {unionType: [Number, null]}
-    - in tests - check if correct error types are thrown
-    - write more tests
+    - introduce any type for really weird data
+        - all checks just would be skipped
+        - syntax
+            { key: jd.any }
+            { key: "any" }
     - global flag to make everything optional/or everything mandatory
     - nullable: true flag?
         - { type: Number, nullable: true } - means it could be Number or null
