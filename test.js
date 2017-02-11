@@ -3,17 +3,14 @@ import _ from 'lodash'
 
 import jd from './index.js'
 
-function decodingShouldBeOk (t, value, decoder) {
-  const result = jd(value, decoder)
+function decodingShouldBeOk (t, result, value) {
   t.deepEqual(result, {
     error: null,
     data: value
   })
 }
 
-function decodingShouldError (t, value, decoder) {
-  const result = jd(value, decoder)
-
+function decodingShouldError (t, result) {
   t.deepEqual(_.size(result), 2)
   t.deepEqual(result.data, null)
   t.deepEqual(_.isObject(result.error), true)
@@ -107,7 +104,7 @@ test('Types matrix', t => {
 
     for (const [decoder, value] of type) {
       // decoder should correctly decode value
-      decodingShouldBeOk(t, value, decoder)
+      decodingShouldBeOk(t, jd(value, decoder), value)
 
       for (const keyTypeAgain in dataTypes) {
         if (keyTypeAgain === keyType) continue
@@ -115,10 +112,10 @@ test('Types matrix', t => {
         const typeOther = dataTypes[keyTypeAgain]
         for (const [decoderOther, valueOther] of typeOther) {
           // decoder should not decode agains values from other data types
-          decodingShouldError(t, valueOther, decoder)
+          decodingShouldError(t, jd(valueOther, decoder))
 
           // value should not decode agains decoders from other types
-          decodingShouldError(t, value, decoderOther)
+          decodingShouldError(t, jd(value, decoderOther))
         }
       }
     }
@@ -141,7 +138,7 @@ test('Object', t => {
     string: 'hello'
   }
 
-  decodingShouldBeOk(t, value, decoder)
+  decodingShouldBeOk(t, jd(value, decoder), value)
 })
 
 test('Nested types', t => {
@@ -150,36 +147,36 @@ test('Nested types', t => {
   // Arrays
   decoder = [[Number]]
   value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-  decodingShouldBeOk(t, value, decoder)
+  decodingShouldBeOk(t, jd(value, decoder), value)
 
   decoder = [[[Number]]]
   value = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]]
-  decodingShouldBeOk(t, value, decoder)
+  decodingShouldBeOk(t, jd(value, decoder), value)
 
   decoder = [[{ x: Number }]]
   value = [[{ x: 1 }, { x: 2 }], [{ x: 3 }, { x: 4 }]]
-  decodingShouldBeOk(t, value, decoder)
+  decodingShouldBeOk(t, jd(value, decoder), value)
 
   decoder = [{ x: [Number] }]
   value = [{ x: [1, 2, 3] }]
-  decodingShouldBeOk(t, value, decoder)
+  decodingShouldBeOk(t, jd(value, decoder), value)
 
   // Objects
   decoder = { object: [[Number]] }
   value = { object: [[1, 2], [3, 4], [5, 6]] }
-  decodingShouldBeOk(t, value, decoder)
+  decodingShouldBeOk(t, jd(value, decoder), value)
 
   decoder = { object: [{ x: Number }] }
   value = { object: [{ x: 0 }, { x: 1 }, { x: 2 }] }
-  decodingShouldBeOk(t, value, decoder)
+  decodingShouldBeOk(t, jd(value, decoder), value)
 
   decoder = { object: { x: { y: Number } } }
   value = { object: { x: { y: 1 } } }
-  decodingShouldBeOk(t, value, decoder)
+  decodingShouldBeOk(t, jd(value, decoder), value)
 
   decoder = { object: { x: [Number] } }
   value = { object: { x: [1, 2, 3] } }
-  decodingShouldBeOk(t, value, decoder)
+  decodingShouldBeOk(t, jd(value, decoder), value)
 })
 
 test('Shared type objects', t => {
@@ -211,11 +208,16 @@ test('Shared type objects', t => {
     ]
   }
 
-  decodingShouldBeOk(t, value, decoder)
+  decodingShouldBeOk(t, jd(value, decoder), value)
 })
 
 test('Error codes', t => {
-  // 0
+  // let decoder, value, result
+
+  // decoder = null
+  // value = null
+  // result = jd(value, decoder)
+
 })
 
 test('Decoder with configuration', t => {

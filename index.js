@@ -16,6 +16,7 @@ const decoderDefaults = {
   optional: false
 }
 
+// VOLATILE: path attribute should not be public
 function jsonDecode (dataInput, decoderInput, path = '<data>') {
   const dataType = dataToType(dataInput)
 
@@ -36,7 +37,7 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
       error: {
         message: `Expected data type "${typeToString(decoder.type)}", got data type "${typeToString(dataType)}"`,
         path: path,
-        code: 1
+        code: 100
       },
       data: null
     }
@@ -54,7 +55,7 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
           error: {
             message: `Decoder is specified as Array but type of its values is not specified`,
             path: path,
-            code: 2
+            code: 200
           },
           data: null
         }
@@ -63,7 +64,7 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
           error: {
             message: `More than one type of Array values is specified`,
             path: path,
-            code: 3
+            code: 300
           },
           data: null
         }
@@ -85,7 +86,7 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
                 error: {
                   message: `Array value is ${arrayValue} does not match the decoder ${typeToString(typeArrayDecoder)}.`,
                   path: path,
-                  code: 4
+                  code: 400
                 },
                 data: null
               }
@@ -109,7 +110,7 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
           error: {
             message: `Decoder is specified as Object there are no keys specified in the decoder.`,
             path: path,
-            code: 5
+            code: 500
           },
           data: null
         }
@@ -124,7 +125,7 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
             error: {
               message: `Key "${decoderObjectKey}" is missing in the data ${dataInput}.`,
               path: path,
-              code: 6
+              code: 600
             },
             data: null
           }
@@ -146,7 +147,7 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
                 error: {
                   message: `Object value "${objectValue}" is not the same type of the decoder which is "${typeToString(typeObjectDecoder)}".`,
                   path: path,
-                  code: 7
+                  code: 700
                 },
                 data: null
               }
@@ -168,7 +169,7 @@ function jsonDecode (dataInput, decoderInput, path = '<data>') {
         error: {
           message: `Unknown decoder type ${decoder.value}.`,
           path: path,
-          code: 8
+          code: 800
         },
         data: null
       }
