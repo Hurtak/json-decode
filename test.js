@@ -100,13 +100,13 @@ test.only('Types matrix', t => {
           let res
           res = jd(valueOther, decoder)
           t.deepEqual(typeof res.error, 'string')
-          t.deepEqual(res.data, valueOther)
+          t.deepEqual(res.data, null)
           t.deepEqual(_.size(res), 2)
 
           // value should not decode agains decoders from other types
           res = jd(value, decoderOther)
           t.deepEqual(typeof res.error, 'string')
-          t.deepEqual(res.data, value)
+          t.deepEqual(res.data, null)
           t.deepEqual(_.size(res), 2)
         }
       }

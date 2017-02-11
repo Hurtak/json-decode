@@ -34,7 +34,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
   if (dataType !== decoder.type) {
     return {
       error: `Expected data type "${typeToString(decoder.type)}", got data type "${typeToString(dataType)}"`,
-      data: dataInputWhole
+      data: null
     }
   }
 
@@ -48,12 +48,12 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
       if (decoder.value.length === 0) {
         return {
           error: `Decoder is specified as Array but type of its values is not specified`,
-          data: dataInputWhole
+          data: null
         }
       } else if (decoder.value.length >= 2) {
         return {
           error: `More than one type of Array values is specified`,
-          data: dataInputWhole
+          data: null
         }
       }
 
@@ -69,7 +69,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
             if (typeArrayValue !== typeArrayDecoder) {
               return {
                 error: `Array value is ${arrayValue} does not match the decoder ${typeToString(typeArrayDecoder)}.`,
-                data: dataInputWhole
+                data: null
               }
             }
           }
@@ -90,7 +90,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
       if (Object.keys(decoder.value).length === 0) {
         return {
           error: `Decoder is specified as Object there are no keys specified in the decoder.`,
-          data: dataInputWhole
+          data: null
         }
       }
 
@@ -100,7 +100,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
         if (!(decoderObjectKey in dataInput)) {
           return {
             error: `Key "${decoderObjectKey}" is missing in the data ${dataInput}.`,
-            data: dataInputWhole
+            data: null
           }
         }
 
@@ -117,7 +117,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
             if (typeObjectDecoder !== typeObjectValue) {
               return {
                 error: `Object value "${objectValue}" is not the same type of the decoder which is "${typeToString(typeObjectDecoder)}".`,
-                data: dataInputWhole
+                data: null
               }
             }
             break
@@ -135,7 +135,7 @@ function jsonDecode (dataInput, decoderInput, dataInputWhole = dataInput) {
     default:
       return {
         error: `Unknown decoder type ${decoder.value}.`,
-        data: dataInputWhole
+        data: null
       }
   }
 
