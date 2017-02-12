@@ -327,7 +327,7 @@ test('Error codes', t => {
   }
 })
 
-test('Error path', t => {
+test('Error codes', t => {
   let decoder, value, result
 
   // basic type
@@ -369,6 +369,20 @@ test('Error path', t => {
   result = jd(value, decoder)
   decodingShouldError(t, result)
   t.deepEqual(result.error.path, '<data>.b[1].bb[1]')
+})
+
+test('Number of arguments', t => {
+  // Test on `undefined` to make sure we are really checking number of arguments
+  // and not their values (which would be undefined if user did not pass them).
+
+  for (let argsNumber = 0; argsNumber <= 10; argsNumber++) {
+    const args = new Array(argsNumber).fill(undefined)
+    if (argsNumber === 2) {
+      t.notThrows(() => jd(...args))
+    } else {
+      t.throws(() => jd(...args))
+    }
+  }
 })
 
 test('Decoder with configuration', t => {

@@ -17,6 +17,11 @@ const decoderDefaults = {
 }
 
 function main (value, decoder) {
+  const argsNumber = arguments.length
+  if (argsNumber === 0) throw new Error('Wrong number of arguments, given 0 arguments, expecting 2 - value and decoder.')
+  if (argsNumber === 1) throw new Error('Wrong number of arguments, given 1 argument, expecting 2 - value and decoder.')
+  if (argsNumber >= 3) throw new Error(`Wrong number of arguments, given ${argsNumber} arguments, expecting 2 - value and decoder.`)
+
   return jsonDecode(value, decoder)
 }
 
