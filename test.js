@@ -3,7 +3,9 @@ import _ from 'lodash'
 
 import jd from './index.js'
 
-function decodingShouldBeOk (t, result, value) {
+function decodingShouldSucceed (t, result, value) {
+  if (arguments.length !== 3) throw new Error('Wrong number of arguments.')
+
   t.deepEqual(result, {
     error: null,
     data: value
@@ -11,6 +13,8 @@ function decodingShouldBeOk (t, result, value) {
 }
 
 function decodingShouldError (t, result) {
+  if (arguments.length !== 2) throw new Error('Wrong number of arguments.')
+
   t.deepEqual(_.size(result), 2)
   t.deepEqual(result.data, null)
   t.deepEqual(_.isObject(result.error), true)
@@ -104,7 +108,7 @@ test('Types matrix', t => {
 
     for (const [decoder, value] of type) {
       // decoder should correctly decode value
-      decodingShouldBeOk(t, jd(value, decoder), value)
+      decodingShouldSucceed(t, jd(value, decoder), value)
 
       for (const keyTypeAgain in dataTypes) {
         if (keyTypeAgain === keyType) continue
@@ -137,7 +141,7 @@ test('Object', t => {
     number: 1,
     string: 'hello'
   }
-  decodingShouldBeOk(t, jd(valueOriginal, decoderOriginal), valueOriginal)
+  decodingShouldSucceed(t, jd(valueOriginal, decoderOriginal), valueOriginal)
 
   let decoder, value
 
@@ -145,7 +149,7 @@ test('Object', t => {
   decoder = _.cloneDeep(decoderOriginal)
   value = _.cloneDeep(valueOriginal)
   value.additionalProperty = true
-  decodingShouldBeOk(t, jd(value, decoder), value)
+  decodingShouldSucceed(t, jd(value, decoder), value)
 
   decoder = _.cloneDeep(decoderOriginal)
   value = _.cloneDeep(valueOriginal)
@@ -166,11 +170,11 @@ test('Nested types', t => {
   decoder = [[Number]]
 
   value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-  decodingShouldBeOk(t, jd(value, decoder), value)
+  decodingShouldSucceed(t, jd(value, decoder), value)
   value = [[]]
-  decodingShouldBeOk(t, jd(value, decoder), value)
+  decodingShouldSucceed(t, jd(value, decoder), value)
   value = []
-  decodingShouldBeOk(t, jd(value, decoder), value)
+  decodingShouldSucceed(t, jd(value, decoder), value)
   value = undefined
   decodingShouldError(t, jd(value, decoder))
   value = [[1, 2, 3], [4, '5', 6], [7, 8, 9]]
@@ -179,14 +183,14 @@ test('Nested types', t => {
   decoder = [[[Number]]]
 
   value = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]]
-  decodingShouldBeOk(t, jd(value, decoder), value)
+  decodingShouldSucceed(t, jd(value, decoder), value)
   value = [[[1, 2], [3, 4]], [['5', 6], [7, 8]]]
-  decodingShouldError(t, jd(value, decoder), value)
+  decodingShouldError(t, jd(value, decoder))
 
   decoder = [[{ x: Number }]]
 
   value = [[{ x: 1 }, { x: 2 }], [{ x: 3 }, { x: 4 }]]
-  decodingShouldBeOk(t, jd(value, decoder), value)
+  decodingShouldSucceed(t, jd(value, decoder), value)
   value = [[{ x: 1 }, { x: 2 }], [{ x: true }, { x: 4 }]]
   decodingShouldError(t, jd(value, decoder))
   value = [[{ x: 1 }, { x: 2 }], [{}, { x: 4 }]]
@@ -195,7 +199,7 @@ test('Nested types', t => {
   decoder = [{ x: [Number] }]
 
   value = [{ x: [1, 2, 3] }]
-  decodingShouldBeOk(t, jd(value, decoder), value)
+  decodingShouldSucceed(t, jd(value, decoder), value)
   value = [{ x: [1, '2', 3] }]
   decodingShouldError(t, jd(value, decoder))
   value = [{}]
@@ -205,28 +209,28 @@ test('Nested types', t => {
   decoder = { object: [[Number]] }
 
   value = { object: [[1, 2], [3, 4], [5, 6]] }
-  decodingShouldBeOk(t, jd(value, decoder), value)
+  decodingShouldSucceed(t, jd(value, decoder), value)
   value = { object: [[1, 2], [3, {'4': 4}], [5, 6]] }
   decodingShouldError(t, jd(value, decoder))
 
   decoder = { object: [{ x: Number }] }
 
   value = { object: [{ x: 0 }, { x: 1 }, { x: 2 }] }
-  decodingShouldBeOk(t, jd(value, decoder), value)
+  decodingShouldSucceed(t, jd(value, decoder), value)
   value = { object: [{ x: 0 }, {}, { x: 2 }] }
   decodingShouldError(t, jd(value, decoder))
 
   decoder = { object: { x: { y: Number } } }
 
   value = { object: { x: { y: 1 } } }
-  decodingShouldBeOk(t, jd(value, decoder), value)
+  decodingShouldSucceed(t, jd(value, decoder), value)
   value = { object: { x: { y: null } } }
   decodingShouldError(t, jd(value, decoder))
 
   decoder = { object: { x: [Number] } }
 
   value = { object: { x: [1, 2, 3] } }
-  decodingShouldBeOk(t, jd(value, decoder), value)
+  decodingShouldSucceed(t, jd(value, decoder), value)
   value = { object: { x: [1, null, 3] } }
   decodingShouldError(t, jd(value, decoder))
 })
@@ -259,7 +263,7 @@ test('Shared type objects', t => {
       { username: 'Nina', email: 'tom@gmail.com', salary: 50000 }
     ]
   }
-  decodingShouldBeOk(t, jd(valueOriginal, decoderOriginal), valueOriginal)
+  decodingShouldSucceed(t, jd(valueOriginal, decoderOriginal), valueOriginal)
 
   let decoder, value
 
@@ -386,11 +390,25 @@ test('Number of arguments', t => {
 })
 
 test('Decoder with configuration', t => {
-  // TODO: test if type has unsupported value?
-  //       if it has unsupported value then should we threat it as regular type
-  //       instead of object type?? - could we make it unambiguous
+  let decoder, value
+
+  // no config
+  decoder = Number
+  value = 0
+  decodingShouldSucceed(t, jd(value, decoder), value)
+
+  // with config
+  decoder = { $type: Number }
+  value = 0
+  decodingShouldSucceed(t, jd(value, decoder), value)
+
+  // with config + invalid decoder
+  decoder = { $type: undefined }
+  value = 0
+  decodingShouldError(t, jd(value, decoder))
+
+
   // t.deepEqual(jd('abc', { type: String }), 'abc')
-  // t.deepEqual(jd(1, { type: Number }), 1)
   // t.deepEqual(jd([1], { type: [Number] }), [1])
   // t.deepEqual(jd({ a: 1 }, { type: { a: Number } }), { a: 1 })
 })

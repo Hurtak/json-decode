@@ -3,6 +3,20 @@
 ## TODO
 
 - features
+    - union types
+        - possible names `unionType`
+        - [null, 1, null, 10, 10]
+        - {unionType: [Number, null]}
+    - TODO
+        - how do we differenciate between
+            - decoder object with property type { type: Number }
+            - decoder with configuration { type: Number }
+            - for now we will just use `$` for config stuff { $type: Number }
+    - consider flipping the arguments??
+        - jd(value, decoder) -> jd(decoder, value)
+    - tuples
+        - ["Ok", 1, 1]
+        - {tuple: [String, Number, Number]}
     - optional types
         - optional types - if present check against type, if not use default
         // nullable
@@ -41,18 +55,11 @@
             ]
     - walk through the whole object to determine what is wrong?
         - return array of errors instead of one error?
-    - tuples
-        - ["Ok", 1, 1]
-        - {tuple: [String, Number, Number]}
     - consider putting decoder validation at the top
         - currenty if we have
             - value "10"
             - decoder [Nonsens]
             - we detect type mismatch String<->Array but not invalid decoder because we are comparing one by one recursively and we did not get to the nested invalid decoder value yet
-    - union types
-        - possible names `oneof`, `typeUnion`, `unionType`
-        - [null, 1, null, 10, 10]
-        - {unionType: [Number, null]}
     - introduce any type for really weird data
         - all checks just would be skipped
         - syntax

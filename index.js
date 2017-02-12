@@ -12,12 +12,16 @@ const Type = {
   UNKNOWN: 6
 }
 
-const decoderDefaults = {
-  optional: false
+const DecoderCategory = {
+  STANDARD: 0,
+  UNION: 1, // TODO
+  TUPLE: 2 // TODO
 }
 
 function main (value, decoder) {
   const argsNumber = arguments.length
+  // TODO: Maybe validation errors should throw byt decoding errors should be return value.
+  //       If ve do this we should move decoder validation at the top.
   if (argsNumber === 0) throw new Error('Wrong number of arguments, given 0 arguments, expecting 2 - value and decoder.')
   if (argsNumber === 1) throw new Error('Wrong number of arguments, given 1 argument, expecting 2 - value and decoder.')
   if (argsNumber >= 3) throw new Error(`Wrong number of arguments, given ${argsNumber} arguments, expecting 2 - value and decoder.`)
@@ -29,16 +33,34 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
   const valueInputType = valueToType(valueInput)
 
   // VOLATILE: what if user has object with type as a key - { type: stuff }
-  const isDecoderAsObject = _.isObject(decoderInput) && 'type' in decoderInput
-  const decoderInputValue = isDecoderAsObject ? decoderInput.type : decoderInput
-  const decoder = Object.assign(
-    {},
-    decoderDefaults,
-    {
-      value: decoderInputValue,
-      type: decoderToType(decoderInputValue)
+  let decoderValue
+  let decoderCategory
+  let decoderType
+
+  if (_.isPlainObject(decoderInput)) {
+    if ('$type' in decoderInput) {
+      // Decoder with configuration, eg.: `{ $type: Number }`
+      decoderType = decoderToType(decoderInput.$type)
+      decoderValue = decoderInput.$type
+      decoderCategory = DecoderCategory.STANDARD
+    } else {
+      // Object decoder
+      decoderValue = decoderInput
+      decoderType = decoderToType(decoderValue)
+      decoderCategory = DecoderCategory.STANDARD
     }
-  )
+  } else {
+    // Decoder with no configuration, eg.: `Number`
+    decoderValue = decoderInput
+    decoderType = decoderToType(decoderValue)
+    decoderCategory = DecoderCategory.STANDARD
+  }
+
+  const decoder = {
+    value: decoderValue,
+    type: decoderType,
+    category: decoderCategory
+  }
 
   if (decoder.type === Type.UNKNOWN) {
     return {
