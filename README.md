@@ -75,8 +75,11 @@
         - { type: Number, nullable: true } - means it could be Number or null
         - is this really better than { unionType: [Number, null] }
         - probably not
+    - add tests for stuff like
+        - data contains NaN, Infinite, -Infinite or other garbage like functions
 
 - when done
+    - remove console.assert(false)
     - cleanup error codes
         - document error codes
     - browser build
@@ -86,6 +89,11 @@
     - code coverage?
 
 - docs
+    - probable Array.isArray is needed, mention
+    - mention
+        - minified size
+        - minified + gzipped
+    - minimum supported node version
     - compare to json schema
         - code over configuration
              "oneOf": [
@@ -117,13 +125,14 @@
     - linter tests
     - determine supported nodejs environments
     - list required polyfills
+    - .npmignore
+        - should published thing contain readme, license, tests?
 
 - inspiration
     - http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/latest
     - https://guide.elm-lang.org/interop/json.html
     - http://package.elm-lang.org/packages/elm-lang/core/latest/Json-Decode
 
-- do not import the whole lodash?
 - benchmarks?
 - readme stuff
     - done with test driven development

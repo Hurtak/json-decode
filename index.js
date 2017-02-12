@@ -1,6 +1,8 @@
 'use strict'
 
-const _ = require('lodash')
+//
+// Enums
+//
 
 const Type = {
   NULL: 0,
@@ -18,6 +20,10 @@ const DecoderCategory = {
   TUPLE: 2 // TODO
 }
 
+//
+// Main functions
+//
+
 function main (value, decoder) {
   const argsNumber = arguments.length
   // TODO: Maybe validation errors should throw byt decoding errors should be return value.
@@ -32,19 +38,18 @@ function main (value, decoder) {
 function jsonDecode (valueInput, decoderInput, path = '<data>') {
   const valueInputType = valueToType(valueInput)
 
-  // VOLATILE: what if user has object with type as a key - { type: stuff }
   let decoderValue
   let decoderCategory
   let decoderType
 
-  if (_.isPlainObject(decoderInput)) {
+  if (isPlainObject(decoderInput)) {
     if ('$type' in decoderInput) {
       // Decoder with configuration, eg.: `{ $type: Number }`
       decoderType = decoderToType(decoderInput.$type)
       decoderValue = decoderInput.$type
       decoderCategory = DecoderCategory.STANDARD
     } else {
-      // Object decoder
+      // Object decoder, eg.: `{ x: Number }`
       decoderValue = decoderInput
       decoderType = decoderToType(decoderValue)
       decoderCategory = DecoderCategory.STANDARD
@@ -156,6 +161,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
       }
       break
     default:
+      console.assert(false) // TODO remove
       break
   }
 
@@ -165,6 +171,21 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
   }
 }
 
+//
+// Type detection
+//
+
+const isPlainObject = require('lodash/isPlainObject')
+const isNull = x => x === null
+const isBoolean = x => x === true || x === false
+const isNumber = x => typeof x === 'number'
+const isString = x => typeof x === 'string'
+const isArray = x => Array.isArray(x)
+
+//
+// Type conversion
+//
+
 function decoderToType (input) {
   switch (input) {
     case null: return Type.NULL
@@ -172,19 +193,19 @@ function decoderToType (input) {
     case Number: return Type.NUMBER
     case String: return Type.STRING
     default:
-      if (_.isArray(input)) return Type.ARRAY
-      else if (_.isPlainObject(input)) return Type.OBJECT
+      if (isArray(input)) return Type.ARRAY
+      else if (isPlainObject(input)) return Type.OBJECT
       else return Type.UNKNOWN
   }
 }
 
 function valueToType (input) {
-  if (_.isNull(input)) return Type.NULL
-  else if (_.isBoolean(input)) return Type.BOOLEAN
-  else if (_.isNumber(input)) return Type.NUMBER
-  else if (_.isString(input)) return Type.STRING
-  else if (_.isArray(input)) return Type.ARRAY
-  else if (_.isPlainObject(input)) return Type.OBJECT
+  if (isNull(input)) return Type.NULL
+  else if (isBoolean(input)) return Type.BOOLEAN
+  else if (isNumber(input)) return Type.NUMBER
+  else if (isString(input)) return Type.STRING
+  else if (isArray(input)) return Type.ARRAY
+  else if (isPlainObject(input)) return Type.OBJECT
   else return Type.UNKNOWN
 }
 
@@ -198,6 +219,11 @@ function typeToString (type) {
     case Type.OBJECT: return 'object'
     case Type.UNKNOWN: return 'unknown'
   }
+  console.assert(false) // TODO remove
 }
+
+//
+// Export
+//
 
 module.exports = main

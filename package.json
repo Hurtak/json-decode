@@ -9,9 +9,10 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "ava": "^0.18.1"
+    "ava": "^0.18.1",
+    "lodash": "^4.17.4"
   },
   "dependencies": {
-    "lodash": "^4.17.4"
+    "lodash.isplainobject": "^4.0.6"
   }
 }
