@@ -3,7 +3,6 @@
 ## TODO
 
 - features
-    - cleanup error messages - grammarly
     - optional types
         - optional types - if present check against type, if not use default
         - should optional type be used when value is
@@ -53,6 +52,7 @@
         - regular
         - min
         - should work with require, import, window.jsonDecode
+    - code coverage?
 
 - solidness
     - travis CI automatic tests

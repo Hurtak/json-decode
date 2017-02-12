@@ -62,7 +62,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
       if (decoder.value.length === 0) {
         return {
           error: {
-            message: `Error at ${path} - decoder is specified as array, but type of its values is missing. Given "[]", expecting "[type]".`,
+            message: `Error at ${path} - the decoder is specified as an array, but the type of its values is missing. Given "[]", expecting "[type]".`,
             path: path,
             code: 200
           },
@@ -95,7 +95,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
       if (Object.keys(decoder.value).length === 0) {
         return {
           error: {
-            message: `Error at ${path} - decoder is specified as object, but there are no properties specified in it. Given "{}", expecting "{key: type, …}".`,
+            message: `Error at ${path} - the decoder is specified as an object, but there are no properties. Given "{}", expecting "{key: type, …}".`,
             path: path,
             code: 400
           },
@@ -109,7 +109,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
         if (!(objectDecoderKey in valueInput)) {
           return {
             error: {
-              message: `Error at ${path} - key "${objectDecoderKey}" is missing in the data. Given: "{key: type}, expecting "{differentKey: type}"`,
+              message: `Error at ${path} - key "${objectDecoderKey}" is missing in the given data. Given: "{key: type}, expecting "{differentKey: type}"`,
               path: path,
               code: 500
             },
