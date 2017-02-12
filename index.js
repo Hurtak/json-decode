@@ -16,7 +16,10 @@ const decoderDefaults = {
   optional: false
 }
 
-// VOLATILE: path attribute should not be public
+function main (value, decoder) {
+  return jsonDecode(value, decoder)
+}
+
 function jsonDecode (valueInput, decoderInput, path = '<data>') {
   const valueInputType = valueToType(valueInput)
 
@@ -170,4 +173,4 @@ function typeToString (type) {
   }
 }
 
-module.exports = jsonDecode
+module.exports = main

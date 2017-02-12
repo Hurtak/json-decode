@@ -109,6 +109,7 @@
         - https://github.com/bestiejs/benchmark.js
     - linter tests
     - determine supported nodejs environments
+    - list required polyfills
 
 - inspiration
     - http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/latest
