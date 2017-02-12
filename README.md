@@ -5,18 +5,42 @@
 - features
     - optional types
         - optional types - if present check against type, if not use default
+        // nullable
+        Nuber
+            1 -> 1
+            null -> null
+            missing -> null
+            'wrong' -> Error
+        // non-nullable
+        Nuber
+            1 -> 1
+            null -> Error
+            missing -> Error
+            'wrong' -> Error
+        //
+        { x: { type: Number, required: true } }
+        {
+            // if null or missing, 0
+            // if Number ok
+            // if other type error
+            x: { type: Number, default: 0 }
+        }
         - should optional type be used when value is
             - missing - yes
-            - null - maybe
-            - undefined - maybe
+            - null - yes
+            - undefined - yes
+        - maybe field should be optional by default? eg relay?
         - add to the return type
             // list of paths where defaults were applied
+            // desperately needs better API
             defaults: [
                 "wholeDecodedValue.b[0].c",
                 "wholeDecodedValue.b[1].c",
                 "wholeDecodedValue.b[2].c",
                 "wholeDecodedValue.b[3].c",
             ]
+    - walk through the whole object to determine what is wrong?
+        - return array of errors instead of one error?
     - tuples
         - ["Ok", 1, 1]
         - {tuple: [String, Number, Number]}
@@ -54,6 +78,31 @@
         - should work with require, import, window.jsonDecode
     - code coverage?
 
+- docs
+    - compare to json schema
+        - code over configuration
+             "oneOf": [
+                { "$ref": "#/definitions/diskDevice" },
+                { "$ref": "#/definitions/diskUUID" },
+                { "$ref": "#/definitions/nfs" },
+                { "$ref": "#/definitions/tmpfs" }
+            ]
+            vs
+            const values = [
+                '#/definitions/diskDevice',
+                '#/definitions/diskUUID',
+                '#/definitions/nfs',
+                '#/definitions/tmpfs'
+            ]
+            { type: String, default: x => values.some(value => value === x)}
+        - another examples - minimum maxumum
+        - ref
+            - "address": {"$ref": "/SimpleAddress"},
+            - vs
+                - address: SimpleAddress // direct use of object type, no stringly typed stuff
+        - jsonschema docs
+            - http://json-schema.org/example2.html
+            - https://github.com/tdegrunt/jsonschema
 - solidness
     - travis CI automatic tests
     - benchmark
