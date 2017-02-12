@@ -313,7 +313,18 @@ test('Error codes', t => {
   t.deepEqual(result.error.code, 500)
 
   // 600 - unknown decoder type
-  // TODO - unreachable path at the moment
+  const invalidDecoders = [
+    undefined, true, false, 0, 1, '', '1',
+    Array, Object, Function,
+    function () {}, () => {},
+    // eslint-disable-next-line no-new-wrappers, no-new-func
+    new Boolean(), new String(), new Number(), new Function()
+  ]
+  for (const invalidDecoder of invalidDecoders) {
+    result = jd(null, invalidDecoder)
+    decodingShouldError(t, result)
+    t.deepEqual(result.error.code, 600)
+  }
 })
 
 test('Error path', t => {

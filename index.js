@@ -32,7 +32,16 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
     }
   )
 
-  if (valueInputType !== decoder.type) {
+  if (decoder.type === Type.UNKNOWN) {
+    return {
+      error: {
+        message: `Error at ${path} - unknown decoder.`,
+        path: path,
+        code: 600
+      },
+      data: null
+    }
+  } else if (valueInputType !== decoder.type) {
     return {
       error: {
         message: `Error at ${path} - expected type: ${typeToString(decoder.type)}, given type: ${typeToString(valueInputType)}, given value: ${valueInput}.`,
@@ -117,15 +126,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
       }
       break
     default:
-      // TODO: better error message
-      return {
-        error: {
-          message: `Error at ${path} - unknown decoder.`,
-          path: path,
-          code: 600
-        },
-        data: null
-      }
+      break
   }
 
   return {
@@ -142,7 +143,7 @@ function decoderToType (input) {
     case String: return Type.STRING
     default:
       if (_.isArray(input)) return Type.ARRAY
-      else if (_.isObject(input)) return Type.OBJECT
+      else if (_.isPlainObject(input)) return Type.OBJECT
       else return Type.UNKNOWN
   }
 }
@@ -153,7 +154,7 @@ function valueToType (input) {
   else if (_.isNumber(input)) return Type.NUMBER
   else if (_.isString(input)) return Type.STRING
   else if (_.isArray(input)) return Type.ARRAY
-  else if (_.isObject(input)) return Type.OBJECT
+  else if (_.isPlainObject(input)) return Type.OBJECT
   else return Type.UNKNOWN
 }
 
