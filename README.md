@@ -80,6 +80,11 @@
 
 - when done
     - remove console.assert(false)
+    - package.json
+        - author
+        - description
+        - keywords
+        - https://github.com/avajs/ava/blob/master/package.json
     - cleanup error codes
         - document error codes
     - browser build
