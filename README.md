@@ -3,22 +3,117 @@
 ## TODO
 
 - features
-    - union types
-        - possible names `unionType`
-        - [null, 1, null, 10, 10]
-        - {unionType: [Number, null]}
-    - TODO
-        - how do we differenciate between
-            - decoder object with property type { type: Number }
-            - decoder with configuration { type: Number }
-            - for now we will just use `$` for config stuff { $type: Number }
-    - consider flipping the arguments??
-        - jd(value, decoder) -> jd(decoder, value)
-    - tuples
-        - ["Ok", 1, 1]
-        - {tuple: [String, Number, Number]}
+    - inspiration
+        - c#
+        - elm
     - optional types
+        - decoding error should 'bubble up' to the nearest default value
+            decoder
+                {
+                    a: {
+                        type: {
+                            b: {
+                                c: Number
+                            }
+                        },
+                        defaultValue: null
+                    }
+                }
+            value
+                { a: { b: c: null } }
+            returned value
+                { a: null }
         - optional types - if present check against type, if not use default
+        {
+            user: {
+                username: "Pete",
+                registration: 123213213
+            },
+            feed: [
+                { post: "hi there", date: 123 },
+                { post: "hi there", date: 123 }
+            ],
+        }
+        nonnullable
+        - type OK -> validate OK   -> OK -> Apply transforms
+        - type OK -> validate FAIL -> default used    -> OK  -> Apply transforms
+        - type OK -> validate FAIL -> default missing -> FAIL
+        - type FAIL -> default used -> OK -> Apply transforms
+        - type FAIL -> default missing -> FAIL
+        implement
+            rename
+            maybe global to camel case flag?
+            (non)nullable global flag
+            transform
+                - example where we take nulled items and filter them out
+                {
+                    users: [
+                        type: String
+                        transform: users => users.filter(user => user !== null)
+                    ]
+                }
+                - or with strict types
+                {
+                    users: {
+                    type: [{
+                        unionType: [String, null],
+                        default: null
+                        transform: users => users.filter(user => user !== null)
+                    }],
+                    default: []
+                }
+                }
+
+
+        // nullable by default
+        export default {
+        gpsAccuracy: Number,
+        firmy: {
+            type: [{
+            details: {
+                gps_longitude: Number,
+                gps_latitude: Number,
+                description: String,
+                opening_time: {
+                type: [String],
+                validate: x => x.length === 7
+                },
+                dateCreated: {
+                type: Number,
+                transform: x => x * 1000
+                }
+            },
+            route_link: String,
+            is_central: { type: Boolean, defaultValue: false }
+            }],
+            defaultValue: []
+        }
+        }
+
+        // non-nullable by default
+        export default {
+        gpsAccuracy: { type: Number, defaultValue: null },
+        firmy: {
+            type: [{
+            details: {
+                gps_longitude: { type: Number, defaultValue: null },
+                gps_latitude: { type: Number, defaultValue: null },
+                description: String,
+                opening_time: {
+                type: [String],
+                validate: x => x.length === 7
+                },
+                dateCreated: {
+                type: Number,
+                transform: x => x * 1000
+                }
+            },
+            route_link: String,
+            is_central: { type: Boolean, defaultValue: false }
+            }],
+            defaultValue: []
+        }
+        }
         // nullable
         Nuber
             1 -> 1
@@ -53,6 +148,22 @@
                 "wholeDecodedValue.b[2].c",
                 "wholeDecodedValue.b[3].c",
             ]
+    - treat undefined the same as null
+        - in case we want to decode/validate other pieces of data
+    - union types
+        - possible names `unionType`
+        - [null, 1, null, 10, 10]
+        - {unionType: [Number, null]}
+    - TODO
+        - how do we differenciate between
+            - decoder object with property type { type: Number }
+            - decoder with configuration { type: Number }
+            - for now we will just use `$` for config stuff { $type: Number }
+    - consider flipping the arguments??
+        - jd(value, decoder) -> jd(decoder, value)
+    - tuples
+        - ["Ok", 1, 1]
+        - {tuple: [String, Number, Number]}
     - walk through the whole object to determine what is wrong?
         - return array of errors instead of one error?
     - consider putting decoder validation at the top
