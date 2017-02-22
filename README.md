@@ -3,6 +3,19 @@
 ## TODO
 
 - features
+    - new api?
+        jd.Object({
+            x: jd.Number,
+            x: jd.Number.nullable,
+            x: jd.Number.default(10),
+            x: jd.Number.default(10).validate(x => x > 0),
+            arr: jd.Array(jd.Object({
+                    x: jd.Number.nullable
+                })
+            ).default([]),
+            value: jd.Boolean.default(false).rename('isCentral'),
+            value: jd.Boolean.default(false).camelCase
+        })
     - inspiration
         - c#
         - elm
@@ -23,25 +36,7 @@
                 { a: { b: c: null } }
             returned value
                 { a: null }
-        - optional types - if present check against type, if not use default
-        {
-            user: {
-                username: "Pete",
-                registration: 123213213
-            },
-            feed: [
-                { post: "hi there", date: 123 },
-                { post: "hi there", date: 123 }
-            ],
-        }
-        nonnullable
-        - type OK -> validate OK   -> OK -> Apply transforms
-        - type OK -> validate FAIL -> default used    -> OK  -> Apply transforms
-        - type OK -> validate FAIL -> default missing -> FAIL
-        - type FAIL -> default used -> OK -> Apply transforms
-        - type FAIL -> default missing -> FAIL
         implement
-            rename
             maybe global to camel case flag?
             (non)nullable global flag
             transform
@@ -63,81 +58,6 @@
                     default: []
                 }
                 }
-
-
-        // nullable by default
-        export default {
-        gpsAccuracy: Number,
-        firmy: {
-            type: [{
-            details: {
-                gps_longitude: Number,
-                gps_latitude: Number,
-                description: String,
-                opening_time: {
-                type: [String],
-                validate: x => x.length === 7
-                },
-                dateCreated: {
-                type: Number,
-                transform: x => x * 1000
-                }
-            },
-            route_link: String,
-            is_central: { type: Boolean, defaultValue: false }
-            }],
-            defaultValue: []
-        }
-        }
-
-        // non-nullable by default
-        export default {
-        gpsAccuracy: { type: Number, defaultValue: null },
-        firmy: {
-            type: [{
-            details: {
-                gps_longitude: { type: Number, defaultValue: null },
-                gps_latitude: { type: Number, defaultValue: null },
-                description: String,
-                opening_time: {
-                type: [String],
-                validate: x => x.length === 7
-                },
-                dateCreated: {
-                type: Number,
-                transform: x => x * 1000
-                }
-            },
-            route_link: String,
-            is_central: { type: Boolean, defaultValue: false }
-            }],
-            defaultValue: []
-        }
-        }
-        // nullable
-        Nuber
-            1 -> 1
-            null -> null
-            missing -> null
-            'wrong' -> Error
-        // non-nullable
-        Nuber
-            1 -> 1
-            null -> Error
-            missing -> Error
-            'wrong' -> Error
-        //
-        { x: { type: Number, required: true } }
-        {
-            // if null or missing, 0
-            // if Number ok
-            // if other type error
-            x: { type: Number, default: 0 }
-        }
-        - should optional type be used when value is
-            - missing - yes
-            - null - yes
-            - undefined - yes
         - maybe field should be optional by default? eg relay?
         - add to the return type
             // list of paths where defaults were applied
