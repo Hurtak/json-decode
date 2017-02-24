@@ -14,10 +14,11 @@ const Type = {
   UNKNOWN: 6
 }
 
-const DecoderCategory = {
-  STANDARD: 0,
-  UNION: 1, // TODO
-  TUPLE: 2 // TODO
+class Decoder {
+  constructor (type, children = []) {
+    this._type = type
+    this._children = children
+  }
 }
 
 //
@@ -38,33 +39,9 @@ function main (value, decoder) {
 function jsonDecode (valueInput, decoderInput, path = '<data>') {
   const valueInputType = valueToType(valueInput)
 
-  let decoderValue
-  let decoderCategory
-  let decoderType
-
-  if (isPlainObject(decoderInput)) {
-    if ('$type' in decoderInput) {
-      // Decoder with configuration, eg.: `{ $type: Number }`
-      decoderType = decoderToType(decoderInput.$type)
-      decoderValue = decoderInput.$type
-      decoderCategory = DecoderCategory.STANDARD
-    } else {
-      // Object decoder, eg.: `{ x: Number }`
-      decoderValue = decoderInput
-      decoderType = decoderToType(decoderValue)
-      decoderCategory = DecoderCategory.STANDARD
-    }
-  } else {
-    // Decoder with no configuration, eg.: `Number`
-    decoderValue = decoderInput
-    decoderType = decoderToType(decoderValue)
-    decoderCategory = DecoderCategory.STANDARD
-  }
-
   const decoder = {
-    value: decoderValue,
-    type: decoderType,
-    category: decoderCategory
+    children: decoderInput._children,
+    type: decoderInput._type
   }
 
   if (decoder.type === Type.UNKNOWN) {
@@ -94,7 +71,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
     case Type.STRING:
       break
     case Type.ARRAY:
-      if (decoder.value.length === 0) {
+      if (decoder.children.length === 0) {
         return {
           error: {
             message: `Error at ${path} - the decoder is specified as an array, but the type of its values is missing. Given "[]", expecting "[type]".`,
@@ -103,7 +80,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
           },
           data: null
         }
-      } else if (decoder.value.length >= 2) {
+      } else if (decoder.children.length >= 2) {
         // TODO: maybe this should not be error but implicit tuple decoding
         //       if not, put real values into "[type, type, …]"
         return {
@@ -116,7 +93,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
         }
       }
 
-      const arrayDecoder = decoder.value[0]
+      const arrayDecoder = decoder.children[0]
       for (let i = 0; i < valueInput.length; i++) {
         const arrayValue = valueInput[i]
         const res = jsonDecode(arrayValue, arrayDecoder, `${path}[${i}]`)
@@ -127,7 +104,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
 
       break
     case Type.OBJECT:
-      if (Object.keys(decoder.value).length === 0) {
+      if (Object.keys(decoder.children).length === 0) {
         return {
           error: {
             message: `Error at ${path} - the decoder is specified as an object, but there are no properties. Given "{}", expecting "{key: type, …}".`,
@@ -138,8 +115,8 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
         }
       }
 
-      for (const objectDecoderKey in decoder.value) {
-        if (!decoder.value.hasOwnProperty(objectDecoderKey)) break
+      for (const objectDecoderKey in decoder.children) {
+        if (!decoder.children.hasOwnProperty(objectDecoderKey)) break
 
         if (!(objectDecoderKey in valueInput)) {
           return {
@@ -152,7 +129,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
           }
         }
 
-        const objectDecoder = decoder.value[objectDecoderKey]
+        const objectDecoder = decoder.children[objectDecoderKey]
         const objectValue = valueInput[objectDecoderKey]
         const res = jsonDecode(objectValue, objectDecoder, `${path}.${objectDecoderKey}`)
         if (res.error) {
@@ -186,19 +163,6 @@ const isArray = x => Array.isArray(x)
 // Type conversion
 //
 
-function decoderToType (input) {
-  switch (input) {
-    case null: return Type.NULL
-    case Boolean: return Type.BOOLEAN
-    case Number: return Type.NUMBER
-    case String: return Type.STRING
-    default:
-      if (isArray(input)) return Type.ARRAY
-      else if (isPlainObject(input)) return Type.OBJECT
-      else return Type.UNKNOWN
-  }
-}
-
 function valueToType (input) {
   if (isNull(input)) return Type.NULL
   else if (isBoolean(input)) return Type.BOOLEAN
@@ -227,3 +191,9 @@ function typeToString (type) {
 //
 
 module.exports = main
+main.null = new Decoder(Type.NULL)
+main.boolean = new Decoder(Type.BOOLEAN)
+main.number = new Decoder(Type.NUMBER)
+main.string = new Decoder(Type.STRING)
+// main.array = (...args) => new Decoder(Type.ARRAY, args)
+// main.object = (...args) => new Decoder(Type.OBJECT, args)
