@@ -316,6 +316,7 @@ test('Error codes', t => {
   decodingShouldError(t, result)
   t.deepEqual(result.error.code, 500)
 
+  // 600 - unknown decoder type
   const invalidDecoders = [
     undefined, true, false, 0, 1, '', '1',
     Array, Object, Function,
@@ -376,7 +377,7 @@ test.skip('Error paths', t => {
   t.deepEqual(result.error.path, '<data>.b[1].bb[1]')
 })
 
-test.skip('Number of arguments', t => {
+test('Number of arguments', t => {
   // Test on `undefined` to make sure we are really checking number of arguments
   // and not their values (which would be undefined if user did not pass them).
 
@@ -389,66 +390,3 @@ test.skip('Number of arguments', t => {
     }
   }
 })
-
-test.skip('Optional', t => {
-  // t.deepEqual(jd({a: 1}, { a: Number }), { a: 1 })
-  // t.deepEqual(jd({a: 1}, { a: { type: Number, default: 0 } }), { a: 1 })
-  // t.deepEqual(jd({}, { a: { type: Number, default: 0 } }), { a: 0 })
-})
-
-/*
-
-  // validation
-  jd.decode(data, { type: Number, default: 0, validation: x => x >= 200 && x < 300 })
-
-  // union types
-  jd.decode(data2, {
-    normal: Number,
-
-    unionType: { unionType: [String, [String]] },
-    unionTypeOptional: { unionType: [String, [String]], default: [] },
-
-    object: { hello: String },
-
-    objectOptional: {
-      type: { hello: String },
-      default: {}
-    },
-
-    // or more like this?
-    objectOptional: {
-      type: Object,
-      default: {},
-      children: { hello: String },
-    },
-
-    objectUnionTypeOptional: {
-      unionType: [
-        { hello: String },
-        { hola: String }
-      ],
-      default: { hello: 'there' }
-    }
-  })
-
-  // type definitions
-  const user = {
-    username: String
-  }
-
-  const admin = {
-    username: String,
-    rights: [String]
-  }
-
-  jd.decode(data, {
-    unionType: [user, admin]
-  })
-
-  // validation functions
-  jd.decode(data, {
-    type: String,
-    validation: x => x.length > 0
-  })
-
-*/
