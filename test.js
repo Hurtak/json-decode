@@ -232,27 +232,25 @@ test('Nested types', t => {
   decodingShouldError(t, jd(value, decoder))
 })
 
-test.skip('Shared type objects', t => {
-  let decoderOriginal, valueOriginal
-
+test('Shared type objects', t => {
   // define type
-  const UserData = {
-    username: String,
-    email: String
-  }
+  const UserData = jd.object({
+    username: jd.string,
+    email: jd.string
+  })
 
   // extend it
   const UserDataExtended = Object.assign({},
     UserData,
-    { salary: Number }
+    { salary: jd.number }
   )
 
-  decoderOriginal = {
+  const decoderOriginal = jd.object({
     userInfo: UserDataExtended,
     employer: UserData,
-    employees: [UserDataExtended]
-  }
-  valueOriginal = {
+    employees: jd.array(UserDataExtended)
+  })
+  const valueOriginal = {
     userInfo: { username: 'Tom', email: 'tom@gmail.com', salary: 100000 },
     employer: { username: 'Anna', email: 'anna@gmail.com' },
     employees: [
@@ -262,17 +260,15 @@ test.skip('Shared type objects', t => {
   }
   decodingShouldSucceed(t, jd(valueOriginal, decoderOriginal), valueOriginal)
 
-  let decoder, value
+  let value
 
-  decoder = _.cloneDeep(decoderOriginal)
   value = _.cloneDeep(valueOriginal)
   value.employees[1].email = null
-  decodingShouldError(t, jd(value, decoder))
+  decodingShouldError(t, jd(value, decoderOriginal))
 
-  decoder = _.cloneDeep(decoderOriginal)
   value = _.cloneDeep(valueOriginal)
   delete value.employer.username
-  decodingShouldError(t, jd(value, decoder))
+  decodingShouldError(t, jd(value, decoderOriginal))
 })
 
 test.skip('Error codes', t => {
