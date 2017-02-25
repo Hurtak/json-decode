@@ -333,44 +333,44 @@ test('Error codes', t => {
   // TODO: test if decoder has been extended by mistake
 })
 
-test.skip('Error paths', t => {
+test('Error paths', t => {
   let decoder, value, result
 
   // basic type
-  decoder = Number
+  decoder = jd.number
   value = false
   result = jd(value, decoder)
   decodingShouldError(t, result)
   t.deepEqual(result.error.path, '<data>')
 
   // arrays
-  decoder = [Number]
+  decoder = jd.array(jd.number)
   value = [0, 1, '2', 3]
   result = jd(value, decoder)
   decodingShouldError(t, result)
   t.deepEqual(result.error.path, '<data>[2]')
 
-  decoder = [[Number]]
+  decoder = jd.array(jd.array(jd.number))
   value = [[0], [1], [2, '1'], [3]]
   result = jd(value, decoder)
   decodingShouldError(t, result)
   t.deepEqual(result.error.path, '<data>[2][1]')
 
   // objects
-  decoder = {a: Number}
+  decoder = jd.object({a: jd.number})
   value = {a: '1'}
   result = jd(value, decoder)
   decodingShouldError(t, result)
   t.deepEqual(result.error.path, '<data>.a')
 
-  decoder = {a: Number, b: {bb: Number}, c: Number}
+  decoder = jd.object({a: jd.number, b: jd.object({bb: jd.number}), c: jd.number})
   value = {a: 1, b: {bb: '1'}, c: 1}
   result = jd(value, decoder)
   decodingShouldError(t, result)
   t.deepEqual(result.error.path, '<data>.b.bb')
 
   // combined
-  decoder = {a: Number, b: [{ aa: Number, bb: [Number] }], c: Number}
+  decoder = jd.object({a: jd.number, b: jd.array(jd.object({ aa: jd.number, bb: jd.array(jd.number) })), c: jd.number})
   value = {a: 1, b: [{aa: 1, bb: [0, 1]}, {aa: 1, bb: [0, '1', 2]}], c: 1}
   result = jd(value, decoder)
   decodingShouldError(t, result)
