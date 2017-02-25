@@ -160,11 +160,11 @@ test('Object', t => {
   decodingShouldError(t, jd(value, decoder))
 })
 
-test.skip('Nested types', t => {
+test('Nested types', t => {
   let decoder, value
 
   // Arrays
-  decoder = [[Number]]
+  decoder = jd.array(jd.array(jd.number))
 
   value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
   decodingShouldSucceed(t, jd(value, decoder), value)
@@ -177,14 +177,14 @@ test.skip('Nested types', t => {
   value = [[1, 2, 3], [4, '5', 6], [7, 8, 9]]
   decodingShouldError(t, jd(value, decoder))
 
-  decoder = [[[Number]]]
+  decoder = jd.array(jd.array(jd.array(jd.number)))
 
   value = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]]
   decodingShouldSucceed(t, jd(value, decoder), value)
   value = [[[1, 2], [3, 4]], [['5', 6], [7, 8]]]
   decodingShouldError(t, jd(value, decoder))
 
-  decoder = [[{ x: Number }]]
+  decoder = jd.array(jd.array(jd.object({ x: jd.number })))
 
   value = [[{ x: 1 }, { x: 2 }], [{ x: 3 }, { x: 4 }]]
   decodingShouldSucceed(t, jd(value, decoder), value)
@@ -193,7 +193,7 @@ test.skip('Nested types', t => {
   value = [[{ x: 1 }, { x: 2 }], [{}, { x: 4 }]]
   decodingShouldError(t, jd(value, decoder))
 
-  decoder = [{ x: [Number] }]
+  decoder = jd.array(jd.object({ x: jd.array(jd.number) }))
 
   value = [{ x: [1, 2, 3] }]
   decodingShouldSucceed(t, jd(value, decoder), value)
@@ -203,28 +203,28 @@ test.skip('Nested types', t => {
   decodingShouldError(t, jd(value, decoder))
 
   // Objects
-  decoder = { object: [[Number]] }
+  decoder = jd.object({ object: jd.array(jd.array(jd.number)) })
 
   value = { object: [[1, 2], [3, 4], [5, 6]] }
   decodingShouldSucceed(t, jd(value, decoder), value)
   value = { object: [[1, 2], [3, {'4': 4}], [5, 6]] }
   decodingShouldError(t, jd(value, decoder))
 
-  decoder = { object: [{ x: Number }] }
+  decoder = jd.object({ object: jd.array(jd.object({ x: jd.number })) })
 
   value = { object: [{ x: 0 }, { x: 1 }, { x: 2 }] }
   decodingShouldSucceed(t, jd(value, decoder), value)
   value = { object: [{ x: 0 }, {}, { x: 2 }] }
   decodingShouldError(t, jd(value, decoder))
 
-  decoder = { object: { x: { y: Number } } }
+  decoder = jd.object({ object: jd.object({ x: jd.object({ y: jd.number }) }) })
 
   value = { object: { x: { y: 1 } } }
   decodingShouldSucceed(t, jd(value, decoder), value)
   value = { object: { x: { y: null } } }
   decodingShouldError(t, jd(value, decoder))
 
-  decoder = { object: { x: [Number] } }
+  decoder = jd.object({ object: jd.object({ x: jd.array(jd.number) }) })
 
   value = { object: { x: [1, 2, 3] } }
   decodingShouldSucceed(t, jd(value, decoder), value)
