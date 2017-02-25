@@ -136,6 +136,9 @@ function jsonDecode (value, decoderInput, path = '<data>') {
       for (const objectDecoderKey in rootObjectDecoder) {
         if (!rootObjectDecoder.hasOwnProperty(objectDecoderKey)) break
 
+        // console.log(value)
+        // console.log('objectDecoderKey', objectDecoderKey)
+        // console.log('rootObjectDecoder', rootObjectDecoder)
         if (!(objectDecoderKey in value)) {
           return {
             error: {

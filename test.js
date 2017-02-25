@@ -126,40 +126,37 @@ test('Types matrix', t => {
   }
 })
 
-test.skip('Object', t => {
-  let decoderOriginal, valueOriginal
+test('Object', t => {
+  let decoder, value
 
-  decoderOriginal = {
-    null: null,
-    boolean: Boolean,
-    number: Number,
-    string: String
-  }
-  valueOriginal = {
+  // basic check
+  decoder = jd.object({
+    null: jd.null,
+    boolean: jd.boolean,
+    number: jd.number,
+    string: jd.string
+  })
+  value = {
     null: null,
     boolean: true,
     number: 1,
     string: 'hello'
   }
-  decodingShouldSucceed(t, jd(valueOriginal, decoderOriginal), valueOriginal)
-
-  let decoder, value
-
-  // additional property
-  decoder = _.cloneDeep(decoderOriginal)
-  value = _.cloneDeep(valueOriginal)
-  value.additionalProperty = true
   decodingShouldSucceed(t, jd(value, decoder), value)
 
-  decoder = _.cloneDeep(decoderOriginal)
-  value = _.cloneDeep(valueOriginal)
-  decoder.additionalProperty = Boolean
+  // wrong type of property should error
+  decoder = jd.object({ number: jd.number })
+  value = { number: '1' }
   decodingShouldError(t, jd(value, decoder))
 
-  // wrong value
-  decoder = _.cloneDeep(decoderOriginal)
-  value = _.cloneDeep(valueOriginal)
-  value.number = '1'
+  // additional property should be ok
+  decoder = jd.object({ a: jd.number })
+  value = { a: 1, b: 1 }
+  decodingShouldSucceed(t, jd(value, decoder), value)
+
+  // missing property should error
+  decoder = jd.object({ a: jd.number, b: jd.number })
+  value = { a: 1 }
   decodingShouldError(t, jd(value, decoder))
 })
 
