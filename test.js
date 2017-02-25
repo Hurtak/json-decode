@@ -234,16 +234,19 @@ test('Nested types', t => {
 
 test('Shared type objects', t => {
   // define type
-  const UserData = jd.object({
+  const UserDataType = {
     username: jd.string,
     email: jd.string
-  })
+  }
 
-  // extend it
-  const UserDataExtended = Object.assign({},
-    UserData,
-    { salary: jd.number }
-  )
+  // define decoders
+  const UserData = jd.object(UserDataType)
+
+  // extended type decoder
+  // TODO: is there some better way to do this?
+  const UserDataExtended = jd.object(Object.assign({}, UserDataType, {
+    salary: jd.number
+  }))
 
   const decoderOriginal = jd.object({
     userInfo: UserDataExtended,
@@ -263,7 +266,7 @@ test('Shared type objects', t => {
   let value
 
   value = _.cloneDeep(valueOriginal)
-  value.employees[1].email = null
+  value.employees[1].salary = null
   decodingShouldError(t, jd(value, decoderOriginal))
 
   value = _.cloneDeep(valueOriginal)
@@ -271,45 +274,48 @@ test('Shared type objects', t => {
   decodingShouldError(t, jd(value, decoderOriginal))
 })
 
-test.skip('Error codes', t => {
+test('Error codes', t => {
   let decoder, value, result
 
   // 100 - type of value does match the decoder type
-  decoder = Number
+  decoder = jd.number
   value = false
   result = jd(value, decoder)
   decodingShouldError(t, result)
   t.deepEqual(result.error.code, 100)
 
   // 200 - missing type in array decoder
-  decoder = []
+  // TODO wrong type
+  decoder = jd.array()
   value = []
   result = jd(value, decoder)
   decodingShouldError(t, result)
   t.deepEqual(result.error.code, 200)
 
   // 300 - more than one type specified in array decoder
-  decoder = [Number, String]
+  decoder = jd.array(jd.number, jd.string)
   value = []
   result = jd(value, decoder)
   decodingShouldError(t, result)
   t.deepEqual(result.error.code, 300)
 
   // 400 - missing key in object decoder
-  decoder = {}
-  value = {}
-  result = jd(value, decoder)
-  decodingShouldError(t, result)
-  t.deepEqual(result.error.code, 400)
+  // TODO: missing value
+  // TODO: wrong value
+  // TODO: more than one value
+  // decoder = jd.object({})
+  // value = {}
+  // result = jd(value, decoder)
+  // decodingShouldError(t, result)
+  // t.deepEqual(result.error.code, 400)
 
   // 500 - key specified in decoder is missing from decoded object
-  decoder = { key: Number }
+  decoder = jd.object({ key: jd.number })
   value = {}
   result = jd(value, decoder)
   decodingShouldError(t, result)
   t.deepEqual(result.error.code, 500)
 
-  // 600 - unknown decoder type
   const invalidDecoders = [
     undefined, true, false, 0, 1, '', '1',
     Array, Object, Function,
@@ -322,6 +328,8 @@ test.skip('Error codes', t => {
     decodingShouldError(t, result)
     t.deepEqual(result.error.code, 600)
   }
+
+  // TODO: test if decoder has been extended by mistake
 })
 
 test.skip('Error paths', t => {

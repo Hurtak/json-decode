@@ -39,6 +39,17 @@ function main (value, decoder) {
 function jsonDecode (value, decoderInput, path = '<data>') {
   const valueType = valueToType(value)
 
+  if (!(decoderInput instanceof Decoder)) {
+    return {
+      error: {
+        message: `Error at ${path} - unknown decoder, given value: ${value}, expecting instance of decoder. Eg.: jd.string.`,
+        path: path,
+        code: 600
+      },
+      data: null
+    }
+  }
+
   // TODO: this failed here
   // [jd.object({ null: null }), { null: null }],
   // add new error message
@@ -48,16 +59,7 @@ function jsonDecode (value, decoderInput, path = '<data>') {
     type: decoderInput._type
   }
 
-  if (decoder.type === Type.UNKNOWN) {
-    return {
-      error: {
-        message: `Error at ${path} - unknown decoder.`,
-        path: path,
-        code: 600
-      },
-      data: null
-    }
-  } else if (valueType !== decoder.type) {
+  if (valueType !== decoder.type) {
     return {
       error: {
         message: `Error at ${path} - expected type: ${typeToString(decoder.type)}, given type: ${typeToString(valueType)}, given value: ${value}.`,
