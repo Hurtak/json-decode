@@ -324,7 +324,7 @@ test.skip('Error codes', t => {
   }
 })
 
-test.skip('Error codes', t => {
+test.skip('Error paths', t => {
   let decoder, value, result
 
   // basic type
@@ -382,50 +382,10 @@ test.skip('Number of arguments', t => {
   }
 })
 
-test.skip('Decoder with configuration', t => {
-  let decoder, value
-
-  // no config
-  decoder = Number
-  value = 0
-  decodingShouldSucceed(t, jd(value, decoder), value)
-
-  // with config
-  decoder = { $type: Number }
-  value = 0
-  decodingShouldSucceed(t, jd(value, decoder), value)
-
-  // with config + invalid decoder
-  decoder = { $type: undefined }
-  value = 0
-  decodingShouldError(t, jd(value, decoder))
-
-
-  // t.deepEqual(jd('abc', { type: String }), 'abc')
-  // t.deepEqual(jd([1], { type: [Number] }), [1])
-  // t.deepEqual(jd({ a: 1 }, { type: { a: Number } }), { a: 1 })
-})
-
 test.skip('Optional', t => {
   // t.deepEqual(jd({a: 1}, { a: Number }), { a: 1 })
   // t.deepEqual(jd({a: 1}, { a: { type: Number, default: 0 } }), { a: 1 })
   // t.deepEqual(jd({}, { a: { type: Number, default: 0 } }), { a: 0 })
-})
-
-test.skip('unknown decoder type', t => {
-  // TODO: throws but in wrong brach
-  // t.throws(() => jd(undefined, undefined))
-  // t.throws(() => jd(0, 0))
-  // t.throws(() => jd(true, true))
-
-  // const f = () => true
-  // t.throws(() => jd(f, f))
-
-  // const f2 = Function
-  // t.throws(() => jd(f2, f2))
-
-  // const nan = NaN
-  // t.throws(() => jd(nan, nan))
 })
 
 /*
