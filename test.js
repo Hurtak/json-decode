@@ -29,7 +29,7 @@ function decodingShouldError (t, result) {
 
 const dataTypes = {
   null: [ // type
-    [jd.null, null] // [typeDecoder, typeValue]
+    [jd.null, null] // [decoder, value]
   ],
 
   boolean: [
@@ -76,27 +76,27 @@ const dataTypes = {
   ],
 
   array: [
-    // [jd.array(jd.null), [null]],
-    // [jd.array(jd.boolean), [true, false]],
-    // [jd.array(jd.number), [0, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER]],
-    // [jd.array(jd.string), ['', 'hello there']],
+    [jd.array(jd.null), [null]],
+    [jd.array(jd.boolean), [true, false]],
+    [jd.array(jd.number), [0, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER]],
+    [jd.array(jd.string), ['', 'hello there']],
 
-    // [[{ null: null }], [{ null: null }]],
-    // [[{ boolean: Boolean }], [{ boolean: true }]],
-    // [[{ number: Number }], [{ number: 1 }]],
-    // [[{ string: String }], [{ string: 'hello there' }]]
+    [jd.array(jd.object({ null: jd.null })), [{ null: null }]],
+    [jd.array(jd.object({ boolean: jd.boolean })), [{ boolean: true }]],
+    [jd.array(jd.object({ number: jd.number })), [{ number: 1 }]],
+    [jd.array(jd.object({ string: jd.string })), [{ string: 'hello there' }]]
   ],
 
   object: [
-    // [jd.object({ null: null }, { null: null }],
-  //   [{ boolean: Boolean }, { boolean: true }],
-  //   [{ number: Number }, { number: 1 }],
-  //   [{ string: String }, { string: 'hello there' }],
+    [jd.object({ null: jd.null }), { null: null }],
+    [jd.object({ boolean: jd.boolean }), { boolean: true }],
+    [jd.object({ number: jd.number }), { number: 1 }],
+    [jd.object({ string: jd.string }), { string: 'hello there' }],
 
-  //   [{ string: [null] }, { string: [null] }],
-  //   [{ string: [Boolean] }, { string: [true, false] }],
-  //   [{ string: [Number] }, { string: [0, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER] }],
-  //   [{ string: [String] }, { string: ['hello there'] }]
+    [jd.object({ string: jd.array(jd.null) }), { string: [null] }],
+    [jd.object({ string: jd.array(jd.boolean) }), { string: [true, false] }],
+    [jd.object({ string: jd.array(jd.number) }), { string: [0, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER] }],
+    [jd.object({ string: jd.array(jd.string) }), { string: ['hello there'] }]
   ]
 }
 

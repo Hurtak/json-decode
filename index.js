@@ -15,7 +15,7 @@ const Type = {
 }
 
 class Decoder {
-  constructor (type, children = []) {
+  constructor (type, children) {
     this._type = type
     this._children = children
   }
@@ -36,9 +36,13 @@ function main (value, decoder) {
   return jsonDecode(value, decoder)
 }
 
-function jsonDecode (valueInput, decoderInput, path = '<data>') {
-  const valueInputType = valueToType(valueInput)
+function jsonDecode (value, decoderInput, path = '<data>') {
+  const valueType = valueToType(value)
 
+  // TODO: this failed here
+  // [jd.object({ null: null }), { null: null }],
+  // add new error message
+  // it should have been jd.null instead of null
   const decoder = {
     children: decoderInput._children,
     type: decoderInput._type
@@ -53,10 +57,10 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
       },
       data: null
     }
-  } else if (valueInputType !== decoder.type) {
+  } else if (valueType !== decoder.type) {
     return {
       error: {
-        message: `Error at ${path} - expected type: ${typeToString(decoder.type)}, given type: ${typeToString(valueInputType)}, given value: ${valueInput}.`,
+        message: `Error at ${path} - expected type: ${typeToString(decoder.type)}, given type: ${typeToString(valueType)}, given value: ${value}.`,
         path: path,
         code: 100
       },
@@ -94,8 +98,8 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
       }
 
       const arrayDecoder = decoder.children[0]
-      for (let i = 0; i < valueInput.length; i++) {
-        const arrayValue = valueInput[i]
+      for (let i = 0; i < value.length; i++) {
+        const arrayValue = value[i]
         const res = jsonDecode(arrayValue, arrayDecoder, `${path}[${i}]`)
         if (res.error) {
           return res
@@ -107,6 +111,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
       if (Object.keys(decoder.children).length === 0) {
         return {
           error: {
+            // TODO: outdated error mesasge
             message: `Error at ${path} - the decoder is specified as an object, but there are no properties. Given "{}", expecting "{key: type, …}".`,
             path: path,
             code: 400
@@ -114,11 +119,24 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
           data: null
         }
       }
+      if (Object.keys(decoder.children).length >= 2) {
+        return {
+          error: {
+            // TODO: tests
+            message: `Error at ${path} - the decoder is specified as an object, but there more than one objects passed into the decoder. Given "jd.object({a: jd.string}, {b: jd.number})", expecting "jd.object({a: jd.string})".`,
+            path: path,
+            code: 450
+          },
+          data: null
+        }
+      }
+      // TODO: test for when passed decoder is not object, eg jd.object('hello')
 
-      for (const objectDecoderKey in decoder.children) {
-        if (!decoder.children.hasOwnProperty(objectDecoderKey)) break
+      const rootObjectDecoder = decoder.children[0]
+      for (const objectDecoderKey in rootObjectDecoder) {
+        if (!rootObjectDecoder.hasOwnProperty(objectDecoderKey)) break
 
-        if (!(objectDecoderKey in valueInput)) {
+        if (!(objectDecoderKey in value)) {
           return {
             error: {
               message: `Error at ${path} - key "${objectDecoderKey}" is missing in the given data. Given: "{key: type}, expecting "{differentKey: type}"`,
@@ -129,8 +147,8 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
           }
         }
 
-        const objectDecoder = decoder.children[objectDecoderKey]
-        const objectValue = valueInput[objectDecoderKey]
+        const objectDecoder = rootObjectDecoder[objectDecoderKey]
+        const objectValue = value[objectDecoderKey]
         const res = jsonDecode(objectValue, objectDecoder, `${path}.${objectDecoderKey}`)
         if (res.error) {
           return res
@@ -144,7 +162,7 @@ function jsonDecode (valueInput, decoderInput, path = '<data>') {
 
   return {
     error: null,
-    data: valueInput
+    data: value
   }
 }
 
@@ -191,9 +209,20 @@ function typeToString (type) {
 //
 
 module.exports = main
-main.null = new Decoder(Type.NULL)
-main.boolean = new Decoder(Type.BOOLEAN)
-main.number = new Decoder(Type.NUMBER)
-main.string = new Decoder(Type.STRING)
-// main.array = (...args) => new Decoder(Type.ARRAY, args)
-// main.object = (...args) => new Decoder(Type.OBJECT, args)
+
+const exportedTypes = {
+  // TODO: test if null (and other types) are new Decoder instances and are not reused
+  get null () { return new Decoder(Type.NULL) },
+  get boolean () { return new Decoder(Type.BOOLEAN) },
+  get number () { return new Decoder(Type.NUMBER) },
+  get string () { return new Decoder(Type.STRING) },
+  array (...children) { return new Decoder(Type.ARRAY, children) },
+  object (...children) { return new Decoder(Type.OBJECT, children) }
+}
+
+main.null = exportedTypes.null
+main.boolean = exportedTypes.boolean
+main.number = exportedTypes.number
+main.string = exportedTypes.string
+main.array = exportedTypes.array
+main.object = exportedTypes.object
