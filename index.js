@@ -27,7 +27,7 @@ class Decoder {
 
 function main (value, decoder) {
   const argsNumber = arguments.length
-  // TODO: Maybe validation errors should throw byt decoding errors should be return value.
+  // TODO: Maybe validation errors should throw but decoding errors should be return value.
   //       If ve do this we should move decoder validation at the top.
   if (argsNumber === 0) throw new Error('Wrong number of arguments, given 0 arguments, expecting 2 - value and decoder.')
   if (argsNumber === 1) throw new Error('Wrong number of arguments, given 1 argument, expecting 2 - value and decoder.')
@@ -50,10 +50,6 @@ function jsonDecode (value, decoderInput, path = '<data>') {
     }
   }
 
-  // TODO: this failed here
-  // [jd.object({ null: null }), { null: null }],
-  // add new error message
-  // it should have been jd.null instead of null
   const decoder = {
     children: decoderInput._children,
     type: decoderInput._type

@@ -19,6 +19,10 @@
     - inspiration
         - c#
         - elm
+    - do decoder validation only in development build?
+        - probably relying on process.env is bad idea in library land
+        - but adding additional config parameter to the main function sounds reasonable
+            - jd({a: true}, jd.object({a: jd.boolean}), {skipDecoderValidation: true})
     - optional types
         - decoding error should 'bubble up' to the nearest default value
             decoder
