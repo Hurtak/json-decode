@@ -110,10 +110,30 @@ function jsonDecode (value, decoderInput, path = '<data>') {
 
       break
     case Type.OBJECT:
-      if (Object.keys(decoder.children).length === 0) {
+      if (decoder.children.length === 0) {
         return {
           error: {
-            // TODO: outdated error mesasge
+            message: `Error at ${path} - the decoder is specified as an object, there is missing object. Given "jd.object()", expecting "jd.object({key: type, …})".`,
+            path: path,
+            code: 410
+          },
+          data: null
+        }
+      } else if (decoder.children.length >= 2) {
+        return {
+          error: {
+            message: `Error at ${path} - the decoder is specified as an object, but there more than one objects passed into the decoder. Given "jd.object({key: type}, {key: type})", expecting "jd.object({key: type})".`,
+            path: path,
+            code: 450
+          },
+          data: null
+        }
+      }
+
+      const rootObjectDecoder = decoder.children[0]
+      if (Object.keys(rootObjectDecoder).length === 0) {
+        return {
+          error: {
             message: `Error at ${path} - the decoder is specified as an object, but there are no properties. Given "{}", expecting "{key: type, …}".`,
             path: path,
             code: 400
@@ -121,26 +141,10 @@ function jsonDecode (value, decoderInput, path = '<data>') {
           data: null
         }
       }
-      if (Object.keys(decoder.children).length >= 2) {
-        return {
-          error: {
-            // TODO: tests
-            message: `Error at ${path} - the decoder is specified as an object, but there more than one objects passed into the decoder. Given "jd.object({a: jd.string}, {b: jd.number})", expecting "jd.object({a: jd.string})".`,
-            path: path,
-            code: 450
-          },
-          data: null
-        }
-      }
-      // TODO: test for when passed decoder is not object, eg jd.object('hello')
 
-      const rootObjectDecoder = decoder.children[0]
       for (const objectDecoderKey in rootObjectDecoder) {
         if (!rootObjectDecoder.hasOwnProperty(objectDecoderKey)) break
 
-        // console.log(value)
-        // console.log('objectDecoderKey', objectDecoderKey)
-        // console.log('rootObjectDecoder', rootObjectDecoder)
         if (!(objectDecoderKey in value)) {
           return {
             error: {

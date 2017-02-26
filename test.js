@@ -299,15 +299,24 @@ test('Error codes', t => {
   decodingShouldError(t, result)
   t.deepEqual(result.error.code, 300)
 
-  // 400 - missing key in object decoder
-  // TODO: missing value
-  // TODO: wrong value
-  // TODO: more than one value
-  // decoder = jd.object({})
-  // value = {}
-  // result = jd(value, decoder)
-  // decodingShouldError(t, result)
-  // t.deepEqual(result.error.code, 400)
+  // 400 - missing/extra objects in object decoder
+  decoder = jd.object()
+  value = {}
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.code, 410)
+
+  decoder = jd.object({})
+  value = {}
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.code, 400)
+
+  decoder = jd.object({key: jd.string}, {key: jd.number})
+  value = {}
+  result = jd(value, decoder)
+  decodingShouldError(t, result)
+  t.deepEqual(result.error.code, 450)
 
   // 500 - key specified in decoder is missing from decoded object
   decoder = jd.object({ key: jd.number })
@@ -318,7 +327,8 @@ test('Error codes', t => {
 
   // 600 - unknown decoder type
   const invalidDecoders = [
-    undefined, true, false, 0, 1, '', '1',
+    undefined, null, true, false, 0, 1, '', '1',
+    [], {},
     Array, Object, Function,
     function () {}, () => {},
     // eslint-disable-next-line no-new-wrappers, no-new-func
