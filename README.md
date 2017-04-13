@@ -3,6 +3,7 @@
 ## TODO
 
 - features
+    - option to display warning when api returns extra data that are not in the schema
     - new api?
         jd.Object({
             x: jd.Number,
